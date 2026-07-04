@@ -94,7 +94,7 @@
         <h1 style="font-size: var(--font-size-h2); font-weight: var(--font-weight-title); color: #fff; margin: 0; font-family: var(--font-family-title);">金币宝箱</h1>
       </div>
       <div class="coin-badge" style="border-radius: var(--radius-full); padding: 6px 16px; display: flex; align-items: center; gap: 6px; font-size: var(--font-size-small); font-weight: var(--font-weight-title); background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #78350F; font-family: var(--font-family-title);">
-        余额: 128枚 <span style="font-size: 1.125rem;">&#x1F4B0;</span>
+        余额: 128枚 <span style="font-size: 1.125rem;">&#x1FA99;</span>
       </div>
     </header>
 
@@ -121,7 +121,7 @@
       <h2 style="font-size: var(--font-size-h2); font-weight: var(--font-weight-title); margin: 16px 0 8px; font-family: var(--font-family-title); color: var(--color-text);">神秘宝箱</h2>
 
       <div style="display: inline-flex; align-items: center; gap: 4px; border-radius: var(--radius-full); padding: 4px 16px; font-size: var(--font-size-small); font-weight: var(--font-weight-title); margin-bottom: 16px; background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #78350F; font-family: var(--font-family-title);">
-        10枚/次 &#x1F4B0;
+        10枚/次 &#x1FA99;
       </div>
 
       <div style="margin-top: 8px; margin-bottom: 8px;">
@@ -191,13 +191,6 @@
         </div>
 
       </div>
-    </section>
-
-    <!-- ===== Custom Rewards Button ===== -->
-    <section style="padding: 8px 20px 4px;">
-      <button id="custom-rewards-btn" style="width:100%; border-radius:var(--radius-lg); padding:12px 16px; font-size:var(--font-size-small); font-weight:var(--font-weight-title); color:var(--color-secondary); border:2px dashed var(--color-secondary); cursor:pointer; background:transparent; font-family:var(--font-family-title); display:flex; align-items:center; justify-content:center; gap:6px; transition:background 0.2s;">
-        &#x270F;&#xFE0F; 自定义奖励
-      </button>
     </section>
 
     <!-- ===== Recent Wins Section ===== -->
@@ -434,11 +427,6 @@
     .banner-star:nth-child(3) { animation-delay: 0.7s; }
     .banner-star:nth-child(4) { animation-delay: 1.1s; }
   </style>
-<!-- Opening Animation Overlay -->
-<div id="opening-overlay" class="opening-overlay">
-  <div id="opening-chest" class="opening-chest">&#x1F4E6;</div>
-  <div id="opening-reveal" class="opening-reveal"></div>
-</div>
 <!-- Treasure Open Modal -->
 <div id="treasure-modal" style="display:none; position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.6); justify-content:center; align-items:center;">
   <div style="background:#fff; border-radius:var(--radius-lg); padding:32px 24px; text-align:center; max-width:320px; width:90%; position:relative; box-shadow:var(--shadow-float);">
@@ -457,43 +445,6 @@
     <button id="not-enough-close" style="border-radius:var(--radius-full); padding:12px 40px; font-size:var(--font-size-body); font-weight:var(--font-weight-title); color:#fff; border:none; cursor:pointer; background:var(--gradient-purple); font-family:var(--font-family-title);">好的</button>
   </div>
 </div>
-<!-- Custom Rewards Modal -->
-<div id="custom-rewards-modal" style="display:none; position:fixed; inset:0; z-index:150; background:rgba(0,0,0,0.6); justify-content:center; align-items:center;">
-  <div style="background:#fff; border-radius:var(--radius-lg); padding:24px 20px; max-width:380px; width:90%; max-height:80vh; display:flex; flex-direction:column; box-shadow:var(--shadow-float);">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
-      <h3 style="font-family:var(--font-family-title); font-size:var(--font-size-h3); color:var(--color-text); margin:0;">自定义奖励</h3>
-      <button id="custom-rewards-close" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--color-text-secondary); line-height:1;">&#x2715;</button>
-    </div>
-    <!-- Tabs -->
-    <div style="display:flex; gap:8px; margin-bottom:16px;">
-      <button class="custom-tab active-tab" data-tab="bronze" style="flex:1; border-radius:var(--radius-full); padding:8px 0; font-size:var(--font-size-xs); font-weight:var(--font-weight-title); border:2px solid #FDBA74; cursor:pointer; background:linear-gradient(135deg, #FED7AA, #FDBA74); color:#92400E; font-family:var(--font-family-title);">铜宝箱</button>
-      <button class="custom-tab" data-tab="silver" style="flex:1; border-radius:var(--radius-full); padding:8px 0; font-size:var(--font-size-xs); font-weight:var(--font-weight-title); border:2px solid #BFDBFE; cursor:pointer; background:#fff; color:#1E40AF; font-family:var(--font-family-title);">银宝箱</button>
-      <button class="custom-tab" data-tab="gold" style="flex:1; border-radius:var(--radius-full); padding:8px 0; font-size:var(--font-size-xs); font-weight:var(--font-weight-title); border:2px solid #FBBF24; cursor:pointer; background:#fff; color:#78350F; font-family:var(--font-family-title);">金宝箱</button>
-    </div>
-    <!-- Reward list -->
-    <div id="custom-rewards-list" style="flex:1; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:8px; padding-right:4px;">
-    </div>
-    <!-- Add reward input -->
-    <div style="display:flex; gap:8px; margin-top:16px;">
-      <input id="custom-reward-input" type="text" placeholder="输入奖励名称..." maxlength="20" style="flex:1; border-radius:var(--radius-md); padding:10px 12px; font-size:var(--font-size-small); border:2px solid var(--color-border); outline:none; font-family:var(--font-family-body); color:var(--color-text);">
-      <select id="custom-reward-emoji" style="border-radius:var(--radius-md); padding:10px 8px; font-size:1.25rem; border:2px solid var(--color-border); outline:none; cursor:pointer;">
-        <option value="&#x1F381;">&#x1F381;</option>
-        <option value="&#x1F4E6;">&#x1F4E6;</option>
-        <option value="&#x1F31F;">&#x1F31F;</option>
-        <option value="&#x1F451;">&#x1F451;</option>
-        <option value="&#x1F3C6;">&#x1F3C6;</option>
-        <option value="&#x1F4D6;">&#x1F4D6;</option>
-        <option value="&#x270D;&#xFE0F;">&#x270D;&#xFE0F;</option>
-        <option value="&#x1F4B0;">&#x1F4B0;</option>
-        <option value="&#x1F389;">&#x1F389;</option>
-        <option value="&#x1F48E;">&#x1F48E;</option>
-      </select>
-      <button id="custom-reward-add" style="border-radius:var(--radius-md); padding:10px 16px; font-size:var(--font-size-small); font-weight:var(--font-weight-title); color:#fff; border:none; cursor:pointer; background:var(--gradient-rainbow); font-family:var(--font-family-title);">添加</button>
-    </div>
-    <!-- Reset to defaults -->
-    <button id="custom-rewards-reset" style="margin-top:12px; border-radius:var(--radius-md); padding:8px; font-size:var(--font-size-xs); color:var(--color-text-tertiary); border:1px solid var(--color-border); cursor:pointer; background:transparent; font-family:var(--font-family-body);">恢复默认奖励</button>
-  </div>
-</div>
 <style>
 @keyframes celebrateBounce {
   0% { transform: scale(1); }
@@ -501,73 +452,6 @@
   50% { transform: scale(0.9); }
   70% { transform: scale(1.1); }
   100% { transform: scale(1); }
-}
-@keyframes chestShake {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  10% { transform: translate(-4px, -2px) rotate(-3deg); }
-  20% { transform: translate(4px, 2px) rotate(3deg); }
-  30% { transform: translate(-3px, 3px) rotate(-2deg); }
-  40% { transform: translate(3px, -3px) rotate(2deg); }
-  50% { transform: translate(-2px, 2px) rotate(-4deg); }
-  60% { transform: translate(2px, -2px) rotate(4deg); }
-  70% { transform: translate(-4px, 1px) rotate(-2deg); }
-  80% { transform: translate(4px, -1px) rotate(2deg); }
-  90% { transform: translate(-2px, -3px) rotate(-3deg); }
-}
-@keyframes particleFloat {
-  0% { opacity: 0; transform: translate(0, 0) scale(0); }
-  20% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: translate(var(--px, 0), var(--py, -60px)) scale(0.5); }
-}
-@keyframes revealScale {
-  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
-  50% { transform: scale(1.2) rotate(5deg); opacity: 1; }
-  70% { transform: scale(0.95) rotate(-2deg); }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-@keyframes revealGlow {
-  0% { box-shadow: 0 0 0 rgba(251,191,36,0); }
-  50% { box-shadow: 0 0 40px rgba(251,191,36,0.6), 0 0 80px rgba(255,107,157,0.3), 0 0 120px rgba(168,85,247,0.15); }
-  100% { box-shadow: 0 0 20px rgba(251,191,36,0.3), 0 0 40px rgba(255,107,157,0.15); }
-}
-.opening-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0,0,0,0.7);
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-.opening-overlay.active {
-  display: flex;
-}
-.opening-chest {
-  font-size: 5rem;
-  animation: chestShake 0.4s ease-in-out infinite;
-  position: relative;
-  z-index: 10;
-}
-.opening-particle {
-  position: absolute;
-  font-size: 1.5rem;
-  animation: particleFloat 1.2s ease-out forwards;
-  pointer-events: none;
-  z-index: 5;
-}
-.opening-reveal {
-  font-size: 5rem;
-  animation: revealScale 0.8s ease-out forwards, revealGlow 1s ease-out 0.3s forwards;
-  display: none;
-  border-radius: 24px;
-  padding: 16px;
-}
-.opening-reveal.active {
-  display: block;
-}
-.opening-chest.hidden {
-  display: none;
 }
 </style>
 <script>
@@ -588,45 +472,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var coins = 128;
 
-  // Default reward pools
-  var defaultRewards = {
+  // Reward pools for each box type
+  var rewards = {
     bronze: ['可爱贴纸', '彩色铅笔', '小橡皮', '书签'],
     silver: ['手账本', '彩色笔套装', '阅读灯', '笔记本'],
     gold: ['公主皇冠发卡', '精美绘本', '水晶球', '魔法棒']
   };
-  var defaultEmojis = {
+  var emojis = {
     bronze: ['🎀', '✏️', '🧸', '🔖'],
     silver: ['📖', '🖌️', '💡', '📓'],
     gold: ['👑', '📚', '🔮', '✨']
   };
 
-  // Load rewards from localStorage or use defaults
-  function loadRewards() {
-    try {
-      var savedRewards = localStorage.getItem('treasure_rewards');
-      var savedEmojis = localStorage.getItem('treasure_emojis');
-      if (savedRewards) return { rewards: JSON.parse(savedRewards), emojis: savedEmojis ? JSON.parse(savedEmojis) : defaultEmojis };
-    } catch(e) {}
-    return null;
-  }
-  function saveRewards() {
-    try {
-      localStorage.setItem('treasure_rewards', JSON.stringify(rewards));
-      localStorage.setItem('treasure_emojis', JSON.stringify(emojis));
-    } catch(e) {}
-  }
-
-  var loaded = loadRewards();
-  var rewards = loaded ? loaded.rewards : JSON.parse(JSON.stringify(defaultRewards));
-  var emojis = loaded ? loaded.emojis : JSON.parse(JSON.stringify(defaultEmojis));
-
   function updateCoinDisplay() {
     var badges = document.querySelectorAll('.coin-badge');
     badges.forEach(function(b) {
-      b.innerHTML = '余额: ' + coins + '枚 <span style="font-size:1.125rem;">&#x1F4B0;</span>';
+      b.innerHTML = '余额: ' + coins + '枚 <span style="font-size:1.125rem;">&#x1FA99;</span>';
     });
     var priceTag = document.querySelector('[data-price-tag]');
-    if (priceTag) priceTag.textContent = '10枚/次 \u{1F4B0}';
+    if (priceTag) priceTag.textContent = '10枚/次 &#x1FA99;';
   }
 
   function openBox(type, cost) {
@@ -641,53 +505,11 @@ document.addEventListener('DOMContentLoaded', function() {
     var idx = Math.floor(Math.random() * pool.length);
     var reward = pool[idx];
     var emoji = emojiPool[idx];
-
-    // Phase 1: Opening animation with shaking chest and particles
-    var overlay = document.getElementById('opening-overlay');
-    var chest = document.getElementById('opening-chest');
-    var reveal = document.getElementById('opening-reveal');
-    chest.className = 'opening-chest';
-    reveal.className = 'opening-reveal';
-    chest.textContent = type === 'gold' ? '&#x1F451;' : type === 'silver' ? '&#x1F381;' : '&#x1F4E6;';
-    chest.innerHTML = chest.textContent;
-    overlay.classList.add('active');
-
-    // Spawn particles continuously during shake phase
-    var particleInterval = setInterval(function() {
-      if (!overlay.classList.contains('active')) { clearInterval(particleInterval); return; }
-      var sparkles = ['\u2728', '\uD83D\uDCAB', '\u2B50', '\uD83C\uDF1F', '\uD83C\uDF08'];
-      var p = document.createElement('span');
-      p.className = 'opening-particle';
-      p.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
-      var angle = Math.random() * Math.PI * 2;
-      var dist = 60 + Math.random() * 80;
-      p.style.left = 'calc(50% + ' + (Math.random() * 60 - 30) + 'px)';
-      p.style.top = 'calc(50% + ' + (Math.random() * 60 - 30) + 'px)';
-      p.style.setProperty('--px', Math.cos(angle) * dist + 'px');
-      p.style.setProperty('--py', Math.sin(angle) * dist + 'px');
-      p.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
-      overlay.appendChild(p);
-      setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, 1500);
-    }, 200);
-
-    // Phase 2: After 1.5s, show reveal
-    setTimeout(function() {
-      clearInterval(particleInterval);
-      chest.classList.add('hidden');
-      reveal.textContent = emoji;
-      reveal.innerHTML = emoji;
-      reveal.className = 'opening-reveal active';
-    }, 1500);
-
-    // Phase 3: After 2.5s, hide overlay and show result modal
-    setTimeout(function() {
-      overlay.classList.remove('active');
-      document.getElementById('modal-animation').textContent = emoji;
-      document.getElementById('modal-title').textContent = '恭喜获得!';
-      document.getElementById('modal-reward').textContent = reward;
-      document.getElementById('modal-coin-change').textContent = '-' + cost + '枚 金币';
-      document.getElementById('treasure-modal').style.display = 'flex';
-    }, 2500);
+    document.getElementById('modal-animation').textContent = emoji;
+    document.getElementById('modal-title').textContent = '恭喜获得!';
+    document.getElementById('modal-reward').textContent = reward;
+    document.getElementById('modal-coin-change').textContent = '-' + cost + '枚 金币';
+    document.getElementById('treasure-modal').style.display = 'flex';
   }
 
   // Main "开箱" button
@@ -727,115 +549,10 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Close modals on background click
-  ['treasure-modal', 'not-enough-modal', 'custom-rewards-modal'].forEach(function(id) {
+  ['treasure-modal', 'not-enough-modal'].forEach(function(id) {
     document.getElementById(id).addEventListener('click', function(e) {
       if (e.target === this) this.style.display = 'none';
     });
-  });
-
-  // ===== Custom Rewards Modal Logic =====
-  var currentTab = 'bronze';
-  var tabStyles = {
-    bronze: { activeBg: 'linear-gradient(135deg, #FED7AA, #FDBA74)', inactiveBg: '#fff', border: '#FDBA74', color: '#92400E' },
-    silver: { activeBg: 'linear-gradient(135deg, #BFDBFE, #93C5FD)', inactiveBg: '#fff', border: '#BFDBFE', color: '#1E40AF' },
-    gold:   { activeBg: 'linear-gradient(135deg, #FBBF24, #F59E0B)', inactiveBg: '#fff', border: '#FBBF24', color: '#78350F' }
-  };
-
-  function renderCustomRewardsList() {
-    var list = document.getElementById('custom-rewards-list');
-    var items = rewards[currentTab] || [];
-    var emojiItems = emojis[currentTab] || [];
-    list.innerHTML = '';
-    if (items.length === 0) {
-      list.innerHTML = '<p style="text-align:center; color:var(--color-text-tertiary); font-size:var(--font-size-small); padding:20px 0;">暂无奖励，快添加一些吧！</p>';
-      return;
-    }
-    items.forEach(function(item, i) {
-      var row = document.createElement('div');
-      row.style.cssText = 'display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--color-bg); border-radius:var(--radius-md); border:1px solid var(--color-border);';
-      var emojiSpan = document.createElement('span');
-      emojiSpan.style.cssText = 'font-size:1.25rem; flex-shrink:0;';
-      emojiSpan.textContent = emojiItems[i] || '\u{1F381}';
-      var nameSpan = document.createElement('span');
-      nameSpan.style.cssText = 'flex:1; font-size:var(--font-size-small); font-family:var(--font-family-body); color:var(--color-text);';
-      nameSpan.textContent = item;
-      var delBtn = document.createElement('button');
-      delBtn.style.cssText = 'flex-shrink:0; background:none; border:none; font-size:1.125rem; cursor:pointer; color:var(--state-error); line-height:1; padding:2px;';
-      delBtn.textContent = '\u{2715}';
-      delBtn.setAttribute('data-index', i);
-      delBtn.addEventListener('click', function() {
-        var idx = parseInt(this.getAttribute('data-index'));
-        rewards[currentTab].splice(idx, 1);
-        emojis[currentTab].splice(idx, 1);
-        saveRewards();
-        renderCustomRewardsList();
-      });
-      row.appendChild(emojiSpan);
-      row.appendChild(nameSpan);
-      row.appendChild(delBtn);
-      list.appendChild(row);
-    });
-  }
-
-  function switchTab(tab) {
-    currentTab = tab;
-    document.querySelectorAll('.custom-tab').forEach(function(t) {
-      var tTab = t.getAttribute('data-tab');
-      var s = tabStyles[tTab];
-      if (tTab === tab) {
-        t.style.background = s.activeBg;
-        t.style.color = s.color;
-      } else {
-        t.style.background = s.inactiveBg;
-        t.style.color = s.color;
-      }
-    });
-    renderCustomRewardsList();
-  }
-
-  // Open custom rewards modal
-  var customBtn = document.getElementById('custom-rewards-btn');
-  if (customBtn) customBtn.addEventListener('click', function() {
-    switchTab(currentTab);
-    document.getElementById('custom-rewards-modal').style.display = 'flex';
-  });
-  // Close custom rewards modal
-  var customClose = document.getElementById('custom-rewards-close');
-  if (customClose) customClose.addEventListener('click', function() {
-    document.getElementById('custom-rewards-modal').style.display = 'none';
-  });
-  // Tab switching
-  document.querySelectorAll('.custom-tab').forEach(function(t) {
-    t.addEventListener('click', function() {
-      switchTab(this.getAttribute('data-tab'));
-    });
-  });
-  // Add reward
-  var addBtn = document.getElementById('custom-reward-add');
-  var rewardInput = document.getElementById('custom-reward-input');
-  var emojiSelect = document.getElementById('custom-reward-emoji');
-  if (addBtn) addBtn.addEventListener('click', function() {
-    var name = rewardInput.value.trim();
-    if (!name) return;
-    if (!rewards[currentTab]) rewards[currentTab] = [];
-    if (!emojis[currentTab]) emojis[currentTab] = [];
-    rewards[currentTab].push(name);
-    emojis[currentTab].push(emojiSelect.value);
-    saveRewards();
-    rewardInput.value = '';
-    renderCustomRewardsList();
-  });
-  // Allow Enter key to add
-  if (rewardInput) rewardInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); addBtn.click(); }
-  });
-  // Reset to defaults
-  var resetBtn = document.getElementById('custom-rewards-reset');
-  if (resetBtn) resetBtn.addEventListener('click', function() {
-    rewards = JSON.parse(JSON.stringify(defaultRewards));
-    emojis = JSON.parse(JSON.stringify(defaultEmojis));
-    saveRewards();
-    renderCustomRewardsList();
   });
 });
 </script>
