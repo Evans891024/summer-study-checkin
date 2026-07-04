@@ -299,8 +299,9 @@
         .progress-bar-fill {
             height: 100%;
             border-radius: var(--radius-full);
-            width: 33.33%;
+            width: 0%;
             background: var(--gradient-rainbow);
+            transition: width 0.4s ease;
         }
         .summary-footer {
             margin-top: 10px;
@@ -663,6 +664,24 @@ document.addEventListener('DOMContentLoaded', function() {
   var nick = getNickname();
   function sKey(key) { return nick ? key + '_' + nick : key; }
 
+  // One-time migration: clear old scoped data
+  try {
+    if (!localStorage.getItem('app_v3_migrated')) {
+      var prefixesToRemove = ['claimed_achievements_', 'used_prizes_', 'unlocked_achievements_',
+        'treasure_rewards_', 'treasure_emojis_', 'daily_free_date_', 'checkin_calendar_data_',
+        'sc_achievements_claimed_', 'sc_prizes_used_'];
+      Object.keys(localStorage).forEach(function(k) {
+        for (var p = 0; p < prefixesToRemove.length; p++) {
+          if (k.indexOf(prefixesToRemove[p]) === 0) {
+            localStorage.removeItem(k);
+            break;
+          }
+        }
+      });
+      localStorage.setItem('app_v3_migrated', '1');
+    }
+  } catch(e) {}
+
   document.querySelectorAll('[data-dom-id]').forEach(function(el) {
     el.addEventListener('click', function(e) {
       e.preventDefault();
@@ -684,6 +703,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var completedCount = 0;
   var totalTasks = 9;
   var allCheckinData = {};
+  var serverLockedTasks = {}; // Tasks locked from server — cannot be un-checked today
 
   function getTodayKey() {
     var d = new Date();
@@ -709,8 +729,10 @@ document.addEventListener('DOMContentLoaded', function() {
           var cards = document.querySelectorAll('.task-card');
           cards.forEach(function(card, i) {
             if (checkin.completed_tasks.indexOf(i) !== -1) {
+              serverLockedTasks[i] = true; // Lock this task
               card.classList.remove('pending');
               card.classList.add('completed');
+              card.setAttribute('data-locked', 'true');
               var circle = card.querySelector('.check-circle');
               circle.style.border = 'none';
               circle.style.background = 'linear-gradient(135deg, #F472B6, #FB923C)';
@@ -754,11 +776,16 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Make task cards clickable for toggle effect
-  document.querySelectorAll('.task-card').forEach(function(card) {
+  document.querySelectorAll('.task-card').forEach(function(card, index) {
     card.addEventListener('click', function(e) {
       if (e.target.closest('[data-dom-id]')) return;
 
       var isCompleted = card.classList.contains('completed');
+      var isLocked = card.getAttribute('data-locked') === 'true';
+
+      // If task is already completed (locked), do NOT allow un-checking
+      if (isCompleted && isLocked) return;
+
       var circle = card.querySelector('.check-circle');
       var badges = card.querySelector('.task-badges');
       var coinReward = card.getAttribute('data-coins') ? parseInt(card.getAttribute('data-coins')) : 0;
@@ -768,7 +795,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       if (isCompleted) {
-        // Un-complete: completed -> pending
+        // Un-complete: completed -> pending (only for tasks completed in this session, not yet locked)
         card.classList.remove('completed', 'just-completed');
         card.classList.add('pending');
         circle.innerHTML = '';
@@ -786,10 +813,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         completedCount--;
         coinCount -= (coinReward || 2);
+        delete serverLockedTasks[index];
       } else {
-        // Complete: pending -> completed
+        // Complete: pending -> completed — immediately lock it
         card.classList.remove('pending');
         card.classList.add('completed', 'just-completed');
+        card.setAttribute('data-locked', 'true');
+        serverLockedTasks[index] = true;
         circle.style.border = 'none';
         circle.style.background = 'linear-gradient(135deg, #F472B6, #FB923C)';
         circle.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';

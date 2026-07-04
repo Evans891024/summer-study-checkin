@@ -594,6 +594,24 @@ document.addEventListener('DOMContentLoaded', function() {
   var nick = getNickname();
   function sKey(key) { return nick ? key + '_' + nick : key; }
 
+  // One-time migration: clear old scoped data
+  try {
+    if (!localStorage.getItem('app_v3_migrated')) {
+      var prefixesToRemove = ['claimed_achievements_', 'used_prizes_', 'unlocked_achievements_',
+        'treasure_rewards_', 'treasure_emojis_', 'daily_free_date_', 'checkin_calendar_data_',
+        'sc_achievements_claimed_', 'sc_prizes_used_'];
+      Object.keys(localStorage).forEach(function(k) {
+        for (var p = 0; p < prefixesToRemove.length; p++) {
+          if (k.indexOf(prefixesToRemove[p]) === 0) {
+            localStorage.removeItem(k);
+            break;
+          }
+        }
+      });
+      localStorage.setItem('app_v3_migrated', '1');
+    }
+  } catch(e) {}
+
   var coins = 0; // Will be loaded from Supabase
   var userDataLoaded = false;
   var serverDailyFreeDate = null;
