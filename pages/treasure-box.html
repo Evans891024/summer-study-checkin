@@ -591,6 +591,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  var nick = getNickname();
+  function sKey(key) { return nick ? key + '_' + nick : key; }
+
   var coins = 0; // Will be loaded from Supabase
   var userDataLoaded = false;
   var serverDailyFreeDate = null;
@@ -610,16 +613,16 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load rewards from localStorage or use defaults
   function loadRewards() {
     try {
-      var savedRewards = localStorage.getItem('treasure_rewards');
-      var savedEmojis = localStorage.getItem('treasure_emojis');
+      var savedRewards = localStorage.getItem(sKey('treasure_rewards'));
+      var savedEmojis = localStorage.getItem(sKey('treasure_emojis'));
       if (savedRewards) return { rewards: JSON.parse(savedRewards), emojis: savedEmojis ? JSON.parse(savedEmojis) : defaultEmojis };
     } catch(e) {}
     return null;
   }
   function saveRewards() {
     try {
-      localStorage.setItem('treasure_rewards', JSON.stringify(rewards));
-      localStorage.setItem('treasure_emojis', JSON.stringify(emojis));
+      localStorage.setItem(sKey('treasure_rewards'), JSON.stringify(rewards));
+      localStorage.setItem(sKey('treasure_emojis'), JSON.stringify(emojis));
     } catch(e) {}
     // Also save to Supabase
     try {
@@ -753,7 +756,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var dailyFreeHint = document.getElementById('daily-free-hint');
   function checkDailyFree() {
     try {
-      var lastDate = localStorage.getItem('daily_free_date') || serverDailyFreeDate;
+      var lastDate = localStorage.getItem(sKey('daily_free_date')) || serverDailyFreeDate;
       var today = new Date().toISOString().split('T')[0];
       if (lastDate === today) {
         dailyFreeBtn.textContent = '明天再来';
@@ -837,7 +840,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('treasure-modal').style.display = 'flex';
         // Mark today as used
         try {
-          localStorage.setItem('daily_free_date', new Date().toISOString().split('T')[0]);
+          localStorage.setItem(sKey('daily_free_date'), new Date().toISOString().split('T')[0]);
           try { DB.updateUser({ daily_free_date: new Date().toISOString().split('T')[0] }); } catch(e) {}
           checkDailyFree();
         } catch(e) {}

@@ -660,6 +660,9 @@ document.addEventListener('DOMContentLoaded', function() {
     'nav-treasure-box': 'treasure-box.html',
     'nav-my-rewards': 'my-rewards.html'
   };
+  var nick = getNickname();
+  function sKey(key) { return nick ? key + '_' + nick : key; }
+
   document.querySelectorAll('[data-dom-id]').forEach(function(el) {
     el.addEventListener('click', function(e) {
       e.preventDefault();
@@ -853,7 +856,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function getCheckinData() {
     try {
-      var local = JSON.parse(localStorage.getItem('checkin_calendar_data') || '{}');
+      var local = JSON.parse(localStorage.getItem(sKey('checkin_calendar_data')) || '{}');
       // Merge with Supabase cache (Supabase takes priority)
       var merged = {};
       for (var k in local) { if (local.hasOwnProperty(k)) merged[k] = local[k]; }
@@ -865,7 +868,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function saveCheckinData(data) {
     try {
-      localStorage.setItem('checkin_calendar_data', JSON.stringify(data));
+      localStorage.setItem(sKey('checkin_calendar_data'), JSON.stringify(data));
       // Also update the in-memory cache
       for (var k in data) { if (data.hasOwnProperty(k)) allCheckinData[k] = data[k]; }
     } catch(e) {}

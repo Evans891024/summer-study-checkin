@@ -731,6 +731,36 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // ========== Per-user localStorage scoping ==========
+  var nickname = getNickname();
+  function scopedKey(key) { return nickname ? key + '_' + nickname : key; }
+
+  // ========== Achievement unlock state (per-user) ==========
+  function getUnlockedAchievements() {
+    try {
+      var data = localStorage.getItem(scopedKey('unlocked_achievements'));
+      return data ? JSON.parse(data) : [1,2,3,4,5,6]; // Default: first 6 unlocked
+    } catch(e) { return [1,2,3,4,5,6]; }
+  }
+  function saveUnlockedAchievements(list) {
+    try { localStorage.setItem(scopedKey('unlocked_achievements'), JSON.stringify(list)); } catch(e) {}
+  }
+  function applyAchievementUnlockStates() {
+    var unlocked = getUnlockedAchievements();
+    document.querySelectorAll('.badge-circle[data-achievement-id]').forEach(function(circle) {
+      var id = parseInt(circle.getAttribute('data-achievement-id'));
+      var parentDiv = circle.closest('div');
+      var nameP = parentDiv ? parentDiv.querySelectorAll('p') : [];
+      if (unlocked.indexOf(id) !== -1) {
+        circle.classList.remove('locked');
+        circle.classList.add('earned');
+      } else {
+        circle.classList.remove('earned');
+        circle.classList.add('locked');
+      }
+    });
+  }
+
   // ========== Supabase Sync (wrapped in ensureLogin) ==========
   ensureLogin(function(nickname) {
     var serverUser = null;
@@ -774,19 +804,20 @@ document.addEventListener('DOMContentLoaded', function() {
           if (user.claimed_achievements) {
             try {
               var ca = typeof user.claimed_achievements === 'string' ? JSON.parse(user.claimed_achievements) : user.claimed_achievements;
-              localStorage.setItem('sc_achievements_claimed', JSON.stringify(ca));
+              localStorage.setItem(scopedKey('sc_achievements_claimed'), JSON.stringify(ca));
             } catch(e) {}
           }
           // Update used prizes from server
           if (user.used_prizes) {
             try {
               var up = typeof user.used_prizes === 'string' ? JSON.parse(user.used_prizes) : user.used_prizes;
-              localStorage.setItem('sc_prizes_used', JSON.stringify(up));
+              localStorage.setItem(scopedKey('sc_prizes_used'), JSON.stringify(up));
             } catch(e) {}
           }
           // Re-apply UI states
           applyAchievementStates();
           applyPrizeStates();
+          applyAchievementUnlockStates();
           updateStats();
         }
       }).catch(function(e) { console.warn('Supabase init failed:', e); });
@@ -814,14 +845,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function getClaimedState() {
     try {
-      return JSON.parse(localStorage.getItem('sc_achievements_claimed') || '{}');
+      return JSON.parse(localStorage.getItem(scopedKey('sc_achievements_claimed')) || '{}');
     } catch (e) {
       return {};
     }
   }
   function saveClaimedState(state) {
-    localStorage.setItem('sc_achievements_claimed', JSON.stringify(state));
-    try { DB.updateUser({ claimed_achievements: JSON.parse(localStorage.getItem('sc_achievements_claimed') || '{}') }); } catch(e) {}
+    localStorage.setItem(scopedKey('sc_achievements_claimed'), JSON.stringify(state));
+    try { DB.updateUser({ claimed_achievements: JSON.parse(localStorage.getItem(scopedKey('sc_achievements_claimed')) || '{}') }); } catch(e) {}
   }
 
   var modal = document.getElementById('achievement-detail-modal');
@@ -921,14 +952,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // ========== Prize Cards ==========
   function getUsedPrizes() {
     try {
-      return JSON.parse(localStorage.getItem('sc_prizes_used') || '{}');
+      return JSON.parse(localStorage.getItem(scopedKey('sc_prizes_used')) || '{}');
     } catch (e) {
       return {};
     }
   }
   function saveUsedPrizes(state) {
-    localStorage.setItem('sc_prizes_used', JSON.stringify(state));
-    try { DB.updateUser({ used_prizes: JSON.parse(localStorage.getItem('sc_prizes_used') || '{}') }); } catch(e) {}
+    localStorage.setItem(scopedKey('sc_prizes_used'), JSON.stringify(state));
+    try { DB.updateUser({ used_prizes: JSON.parse(localStorage.getItem(scopedKey('sc_prizes_used')) || '{}') }); } catch(e) {}
   }
 
   // Restore used state on load
@@ -939,6 +970,9 @@ document.addEventListener('DOMContentLoaded', function() {
       card.classList.add('used');
     }
   });
+
+  // Apply per-user achievement unlock/lock states
+  applyAchievementUnlockStates();
 
   // Click handler for prize cards
   document.querySelectorAll('.prize-card[data-prize-id]').forEach(function(card) {
