@@ -83,6 +83,7 @@
 
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <script src="../db.js"></script>
     <style>
         /* === Reset & Base === */
         *, *::before, *::after {
@@ -426,18 +427,16 @@
       </div>
       <div class="header-coin-badge">
         <span>💰</span>
-        <span>15枚</span>
+        <span>0枚</span>
       </div>
     </header>
 
     <!-- ===== Task Cards Section ===== -->
     <section class="tasks-section">
 
-      <!-- Task 1: 早读·语文 — completed -->
-      <div class="task-card completed">
-        <div class="check-circle">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
+      <!-- Task 1: 早读·语文 -->
+      <div class="task-card pending">
+        <div class="check-circle"></div>
         <div class="task-info">
           <div class="task-name-row">
             <span class="task-emoji">📖</span>
@@ -445,15 +444,13 @@
           </div>
         </div>
         <div class="task-badges">
-          <span class="badge-completed">已完成</span>
+          <span class="badge-coins">+2枚 💰</span>
         </div>
       </div>
 
-      <!-- Task 2: 早读·英语 — completed -->
-      <div class="task-card completed">
-        <div class="check-circle">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
+      <!-- Task 2: 早读·英语 -->
+      <div class="task-card pending">
+        <div class="check-circle"></div>
         <div class="task-info">
           <div class="task-name-row">
             <span class="task-emoji">🔤</span>
@@ -461,15 +458,13 @@
           </div>
         </div>
         <div class="task-badges">
-          <span class="badge-completed">已完成</span>
+          <span class="badge-coins">+2枚 💰</span>
         </div>
       </div>
 
-      <!-- Task 3: 练字 — completed -->
-      <div class="task-card completed">
-        <div class="check-circle">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
+      <!-- Task 3: 练字 -->
+      <div class="task-card pending">
+        <div class="check-circle"></div>
         <div class="task-info">
           <div class="task-name-row">
             <span class="task-emoji">✍️</span>
@@ -477,7 +472,7 @@
           </div>
         </div>
         <div class="task-badges">
-          <span class="badge-completed">已完成</span>
+          <span class="badge-coins">+2枚 💰</span>
         </div>
       </div>
 
@@ -570,7 +565,7 @@
     <!-- ===== Today's Summary Bar ===== -->
     <section class="summary-section">
       <div class="summary-header">
-        <span class="summary-title">今日进度: 3/9 已完成</span>
+        <span class="summary-title">今日进度: 0/9 已完成</span>
         <span class="summary-emoji">🎉</span>
       </div>
       <!-- Progress bar -->
@@ -578,7 +573,7 @@
         <div class="progress-bar-fill"></div>
       </div>
       <div class="summary-footer">
-        <span class="summary-coins-text">已获得 6枚 金币!</span>
+        <span class="summary-coins-text">已获得 0枚 金币!</span>
         <span class="summary-celebration">🎉✨</span>
       </div>
     </section>
@@ -656,9 +651,76 @@ document.addEventListener('DOMContentLoaded', function() {
     dateEl.textContent = (now.getMonth()+1) + '月' + now.getDate() + '日 ' + weekdays[now.getDay()];
   }
 
-  var coinCount = 6;
-  var completedCount = 3;
+  var coinCount = 0;
+  var completedCount = 0;
   var totalTasks = 9;
+  var allCheckinData = {};
+
+  function getTodayKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  // ===== Supabase Initialization =====
+  try {
+    DB.initUser().then(function(user) {
+      if (user && user.total_coins !== undefined && user.total_coins !== null) {
+        coinCount = user.total_coins;
+        var headerCoin = document.querySelector('.header-coin-badge');
+        if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
+      }
+      var todayKey = getTodayKey();
+      return DB.getCheckin(todayKey);
+    }).then(function(checkin) {
+      if (checkin && checkin.completed_tasks) {
+        // Restore task completion states from Supabase
+        completedCount = checkin.completed_count || 0;
+        coinCount = checkin.coins_earned || 0;
+        var cards = document.querySelectorAll('.task-card');
+        cards.forEach(function(card, i) {
+          if (checkin.completed_tasks.indexOf(i) !== -1) {
+            card.classList.remove('pending');
+            card.classList.add('completed');
+            var circle = card.querySelector('.check-circle');
+            circle.style.border = 'none';
+            circle.style.background = 'linear-gradient(135deg, #F472B6, #FB923C)';
+            circle.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            var badges = card.querySelector('.task-badges');
+            var coinSpan = badges.querySelector('.badge-coins');
+            if (coinSpan) coinSpan.remove();
+            var doneSpan = document.createElement('span');
+            doneSpan.className = 'badge-completed';
+            doneSpan.textContent = '已完成';
+            badges.appendChild(doneSpan);
+          }
+        });
+        // Update summary
+        var summaryTitle = document.querySelector('.summary-title');
+        if (summaryTitle) summaryTitle.textContent = '今日进度: ' + completedCount + '/' + totalTasks + ' 已完成';
+        var progressFill = document.querySelector('.progress-bar-fill');
+        if (progressFill) progressFill.style.width = (completedCount / totalTasks * 100) + '%';
+        var coinsText = document.querySelector('.summary-coins-text');
+        if (coinsText) coinsText.textContent = '已获得 ' + coinCount + '枚 金币!';
+        var headerCoin = document.querySelector('.header-coin-badge');
+        if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
+      }
+      // Load all checkin data for calendar
+      return DB.getAllCheckins();
+    }).then(function(checkins) {
+      if (checkins && checkins.length > 0) {
+        checkins.forEach(function(c) {
+          allCheckinData[c.date] = { completed: c.completed_count, total: c.total_count };
+        });
+      }
+      renderCalendar();
+    }).catch(function(err) {
+      console.warn('Supabase init error, using local state:', err);
+      renderCalendar();
+    });
+  } catch(e) {
+    console.warn('Supabase not available, using local state:', e);
+    renderCalendar();
+  }
 
   // Make task cards clickable for toggle effect
   document.querySelectorAll('.task-card').forEach(function(card) {
@@ -725,6 +787,21 @@ document.addEventListener('DOMContentLoaded', function() {
       var headerCoin = document.querySelector('.header-coin-badge');
       if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
       saveTodayCheckin();
+
+      // Save to Supabase (fire-and-forget)
+      try {
+        var todayKey = getTodayKey();
+        var completedIndices = [];
+        document.querySelectorAll('.task-card.completed').forEach(function(c) {
+          document.querySelectorAll('.task-card').forEach(function(tc, ti) {
+            if (tc === c) completedIndices.push(ti);
+          });
+        });
+        DB.saveCheckin(todayKey, completedIndices, completedCount, totalTasks, coinCount);
+        DB.updateUser({ total_coins: coinCount });
+      } catch(e) {
+        console.warn('Supabase save error:', e);
+      }
     });
   });
 
@@ -748,15 +825,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function getCheckinData() {
     try {
-      return JSON.parse(localStorage.getItem('checkin_calendar_data') || '{}');
-    } catch(e) { return {}; }
+      var local = JSON.parse(localStorage.getItem('checkin_calendar_data') || '{}');
+      // Merge with Supabase cache (Supabase takes priority)
+      var merged = {};
+      for (var k in local) { if (local.hasOwnProperty(k)) merged[k] = local[k]; }
+      for (var k in allCheckinData) { if (allCheckinData.hasOwnProperty(k)) merged[k] = allCheckinData[k]; }
+      return merged;
+    } catch(e) {
+      return allCheckinData || {};
+    }
   }
   function saveCheckinData(data) {
-    try { localStorage.setItem('checkin_calendar_data', JSON.stringify(data)); } catch(e) {}
-  }
-  function getTodayKey() {
-    var d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    try {
+      localStorage.setItem('checkin_calendar_data', JSON.stringify(data));
+      // Also update the in-memory cache
+      for (var k in data) { if (data.hasOwnProperty(k)) allCheckinData[k] = data[k]; }
+    } catch(e) {}
   }
   function calcStreak(data) {
     var streak = 0;
@@ -860,14 +944,13 @@ document.addEventListener('DOMContentLoaded', function() {
     renderCalendar();
   });
 
-  renderCalendar();
-
   function saveTodayCheckin() {
     var data = getCheckinData();
     var key = getTodayKey();
     var currentCompleted = document.querySelectorAll('.task-card.completed').length;
     data[key] = { completed: currentCompleted, total: totalTasks };
     saveCheckinData(data);
+    // Supabase save is handled in the task click handler above
     renderCalendar();
   }
 });

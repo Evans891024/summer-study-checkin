@@ -83,6 +83,7 @@
 
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <script src="../db.js"></script>
 </head>
 <body>
   <div style="max-width: 768px; margin: 0 auto; min-height: 100vh; padding-bottom: 96px; background: var(--color-bg);">
@@ -589,7 +590,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  var coins = 128;
+  var coins = 0; // Will be loaded from Supabase
+  var userDataLoaded = false;
+  var serverDailyFreeDate = null;
 
   // Default reward pools
   var defaultRewards = {
@@ -630,6 +633,16 @@ document.addEventListener('DOMContentLoaded', function() {
       localStorage.setItem('treasure_rewards', JSON.stringify(rewards));
       localStorage.setItem('treasure_emojis', JSON.stringify(emojis));
     } catch(e) {}
+    // Also save to Supabase
+    try {
+      DB.updateUser({
+        custom_rewards: {
+          bronze: { names: rewards.bronze, emojis: emojis.bronze },
+          silver: { names: rewards.silver, emojis: emojis.silver },
+          gold: { names: rewards.gold, emojis: emojis.gold }
+        }
+      });
+    } catch(e) {}
   }
   function generateShareURL() {
     var data = { rewards: rewards, emojis: emojis };
@@ -650,6 +663,40 @@ document.addEventListener('DOMContentLoaded', function() {
     emojis = loaded.emojis;
   }
 
+  // Initialize from Supabase
+  try {
+    DB.initUser().then(function(user) {
+      if (user) {
+        coins = user.total_coins || 0;
+        // Load custom rewards from user data
+        if (user.custom_rewards) {
+          try {
+            var cr = typeof user.custom_rewards === 'string' ? JSON.parse(user.custom_rewards) : user.custom_rewards;
+            if (cr && cr.bronze) {
+              rewards.bronze = cr.bronze.names || rewards.bronze;
+              emojis.bronze = cr.bronze.emojis || emojis.bronze;
+            }
+            if (cr && cr.silver) {
+              rewards.silver = cr.silver.names || rewards.silver;
+              emojis.silver = cr.silver.emojis || emojis.silver;
+            }
+            if (cr && cr.gold) {
+              rewards.gold = cr.gold.names || rewards.gold;
+              emojis.gold = cr.gold.emojis || emojis.gold;
+            }
+          } catch(e) {}
+        }
+        // Load daily free date from server
+        if (user.daily_free_date) {
+          serverDailyFreeDate = user.daily_free_date;
+        }
+        userDataLoaded = true;
+        updateCoinDisplay();
+        checkDailyFree();
+      }
+    }).catch(function(e) { console.warn('Supabase init failed:', e); });
+  } catch(e) {}
+
   function updateCoinDisplay() {
     var badges = document.querySelectorAll('.coin-badge');
     badges.forEach(function(b) {
@@ -666,6 +713,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     coins -= cost;
     updateCoinDisplay();
+    try { DB.updateUser({ total_coins: coins }); } catch(e) {}
     var pool = rewards[type] || rewards.bronze;
     var emojiPool = emojis[type] || emojis.bronze;
     var idx = Math.floor(Math.random() * pool.length);
@@ -726,7 +774,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var dailyFreeHint = document.getElementById('daily-free-hint');
   function checkDailyFree() {
     try {
-      var lastDate = localStorage.getItem('daily_free_date');
+      var lastDate = localStorage.getItem('daily_free_date') || serverDailyFreeDate;
       var today = new Date().toISOString().split('T')[0];
       if (lastDate === today) {
         dailyFreeBtn.textContent = '明天再来';
@@ -765,6 +813,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var coinReward = chosen.coins;
       coins += coinReward;
       updateCoinDisplay();
+      try { DB.updateUser({ total_coins: coins }); } catch(e) {}
 
       var overlay = document.getElementById('opening-overlay');
       var chest = document.getElementById('opening-chest');
@@ -810,6 +859,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mark today as used
         try {
           localStorage.setItem('daily_free_date', new Date().toISOString().split('T')[0]);
+          try { DB.updateUser({ daily_free_date: new Date().toISOString().split('T')[0] }); } catch(e) {}
           checkDailyFree();
         } catch(e) {}
       }, 2500);

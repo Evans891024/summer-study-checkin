@@ -83,6 +83,7 @@
 
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <script src="../db.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -246,13 +247,13 @@
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
           <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
             <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F4C5;</div>
-            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-primary); margin: 0;">12天</div>
+            <div class="stat-value" style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-primary); margin: 0;">12天</div>
             <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">打卡天数</div>
           </div>
 
           <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
             <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F4B0;</div>
-            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-accent-yellow); margin: 0;">128枚</div>
+            <div class="stat-value" style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-accent-yellow); margin: 0;">128枚</div>
             <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">获得金币</div>
           </div>
 
@@ -692,6 +693,66 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // ========== Supabase Sync ==========
+  var serverUser = null;
+
+  function updateStats() {
+    try {
+      DB.getAllCheckins().then(function(checkins) {
+        var statItems = document.querySelectorAll('.stat-value');
+        if (statItems[0] && checkins) statItems[0].textContent = checkins.length + '天';
+        if (statItems[1] && serverUser) statItems[1].textContent = (serverUser.total_coins || 0) + '枚';
+      });
+    } catch(e) {}
+  }
+
+  function applyAchievementStates() {
+    var claimed = getClaimedState();
+    document.querySelectorAll('.badge-circle[data-achievement-id]').forEach(function(badge) {
+      var id = badge.getAttribute('data-achievement-id');
+      if (claimed[id]) {
+        badge.style.outline = '2px solid var(--color-accent-green)';
+        badge.style.outlineOffset = '2px';
+      }
+    });
+  }
+
+  function applyPrizeStates() {
+    var used = getUsedPrizes();
+    document.querySelectorAll('.prize-card[data-prize-id]').forEach(function(card) {
+      var prizeId = card.getAttribute('data-prize-id');
+      if (used[prizeId]) {
+        card.classList.add('used');
+      }
+    });
+  }
+
+  try {
+    DB.initUser().then(function(user) {
+      if (user) {
+        serverUser = user;
+        // Update claimed achievements from server
+        if (user.claimed_achievements) {
+          try {
+            var ca = typeof user.claimed_achievements === 'string' ? JSON.parse(user.claimed_achievements) : user.claimed_achievements;
+            localStorage.setItem('sc_achievements_claimed', JSON.stringify(ca));
+          } catch(e) {}
+        }
+        // Update used prizes from server
+        if (user.used_prizes) {
+          try {
+            var up = typeof user.used_prizes === 'string' ? JSON.parse(user.used_prizes) : user.used_prizes;
+            localStorage.setItem('sc_prizes_used', JSON.stringify(up));
+          } catch(e) {}
+        }
+        // Re-apply UI states
+        applyAchievementStates();
+        applyPrizeStates();
+        updateStats();
+      }
+    }).catch(function(e) { console.warn('Supabase init failed:', e); });
+  } catch(e) {}
+
   // ========== Achievement Badges ==========
   var achievements = {
     1: { name: '初来乍到', icon: '\u2B50', desc: '完成你的第一次每日打卡，迈出学习的第一步！每一段旅程都始于第一步。', coins: 5, locked: false, date: '2026-07-01' },
@@ -714,6 +775,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function saveClaimedState(state) {
     localStorage.setItem('sc_achievements_claimed', JSON.stringify(state));
+    try { DB.updateUser({ claimed_achievements: JSON.parse(localStorage.getItem('sc_achievements_claimed') || '{}') }); } catch(e) {}
   }
 
   var modal = document.getElementById('achievement-detail-modal');
@@ -820,6 +882,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function saveUsedPrizes(state) {
     localStorage.setItem('sc_prizes_used', JSON.stringify(state));
+    try { DB.updateUser({ used_prizes: JSON.parse(localStorage.getItem('sc_prizes_used') || '{}') }); } catch(e) {}
   }
 
   // Restore used state on load
