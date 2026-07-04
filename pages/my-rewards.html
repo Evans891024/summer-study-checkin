@@ -121,41 +121,41 @@
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 12px;">
-          <!-- Earned badges -->
+          <!-- All achievements start locked -->
           <div style="text-align: center;">
-            <div class="badge-circle locked badge-yellow" data-achievement-id="1">&#x1F31F;</div>
-            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">初来乍到</p>
-            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">完成首次打卡</p>
+            <div class="badge-circle locked" data-achievement-id="1">&#x1F512;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text-tertiary);">初来乍到</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0; font-style: italic;">即将解锁</p>
           </div>
 
           <div style="text-align: center;">
-            <div class="badge-circle locked badge-orange" data-achievement-id="2">&#x1F525;</div>
-            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">连续3天</p>
-            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">连续打卡3天</p>
+            <div class="badge-circle locked" data-achievement-id="2">&#x1F512;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text-tertiary);">连续3天</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0; font-style: italic;">即将解锁</p>
           </div>
 
           <div style="text-align: center;">
-            <div class="badge-circle locked badge-blue" data-achievement-id="3">&#x1F4DA;</div>
-            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">阅读小达人</p>
-            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">累计阅读7天</p>
+            <div class="badge-circle locked" data-achievement-id="3">&#x1F512;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text-tertiary);">阅读小达人</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0; font-style: italic;">即将解锁</p>
           </div>
 
           <div style="text-align: center;">
-            <div class="badge-circle locked badge-purple" data-achievement-id="4">&#x270D;&#xFE0F;</div>
-            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">练字小能手</p>
-            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">练字5天</p>
+            <div class="badge-circle locked" data-achievement-id="4">&#x1F512;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text-tertiary);">练字小能手</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0; font-style: italic;">即将解锁</p>
           </div>
 
           <div style="text-align: center;">
-            <div class="badge-circle locked badge-golden" data-achievement-id="5">&#x1F451;</div>
-            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">学习小公主</p>
-            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">完成全部任务3天</p>
+            <div class="badge-circle locked" data-achievement-id="5">&#x1F512;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text-tertiary);">学习小公主</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0; font-style: italic;">即将解锁</p>
           </div>
 
           <div style="text-align: center;">
-            <div class="badge-circle locked badge-green" data-achievement-id="6">&#x1F3AF;</div>
-            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">满分达人</p>
-            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">口算全对5次</p>
+            <div class="badge-circle locked" data-achievement-id="6">&#x1F512;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text-tertiary);">满分达人</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0; font-style: italic;">即将解锁</p>
           </div>
 
           <!-- Locked badges -->
@@ -215,62 +215,18 @@
         </div>
       </div>
 
-      <!-- Prize Collection Section -->
-      <div style="margin-bottom: 28px;">
+      <!-- Prize Collection Section (hidden by default, shown dynamically) -->
+      <div id="prizes-section" style="margin-bottom: 28px; display: none;">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
           <span style="font-size: 1.25rem;">&#x1F381;</span>
           <h2 style="font-family: var(--font-family-title); font-size: var(--font-size-h3); margin: 0; color: var(--color-text);">
             宝箱战利品
           </h2>
-          <span style="background: var(--gradient-purple); color: #fff; font-size: var(--font-size-xs); padding: 2px 8px; border-radius: var(--radius-full); font-weight: var(--font-weight-medium);">
-            6件
+          <span id="prize-count" style="background: var(--gradient-purple); color: #fff; font-size: var(--font-size-xs); padding: 2px 8px; border-radius: var(--radius-full); font-weight: var(--font-weight-medium);">
+            0件
           </span>
         </div>
-
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-
-          <!-- Prize 1 -->
-          <div class="prize-card" data-prize-id="prize-1" data-prize-name="粉色蝴蝶结" style="background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: var(--shadow-card);">
-            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x1F380;</div>
-            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">粉色蝴蝶结</p>
-            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 铜宝箱</p>
-          </div>
-
-          <!-- Prize 2 -->
-          <div class="prize-card" data-prize-id="prize-2" data-prize-name="彩虹贴纸套装" style="background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: var(--shadow-card);">
-            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x1F308;</div>
-            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">彩虹贴纸套装</p>
-            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 银宝箱</p>
-          </div>
-
-          <!-- Prize 3 -->
-          <div class="prize-card prize-card-golden" data-prize-id="prize-3" data-prize-name="公主皇冠发卡" style="background: var(--color-surface); border: 1px solid #FDE68A; border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: 0 4px 16px rgba(251,191,36,0.15);">
-            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x1F451;</div>
-            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">公主皇冠发卡</p>
-            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 金宝箱</p>
-          </div>
-
-          <!-- Prize 4 -->
-          <div class="prize-card" data-prize-id="prize-4" data-prize-name="绘本故事书" style="background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: var(--shadow-card);">
-            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x1F4D6;</div>
-            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">绘本故事书</p>
-            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 金宝箱</p>
-          </div>
-
-          <!-- Prize 5 -->
-          <div class="prize-card" data-prize-id="prize-5" data-prize-name="彩色铅笔套装" style="background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: var(--shadow-card);">
-            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x270F;&#xFE0F;</div>
-            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">彩色铅笔套装</p>
-            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 银宝箱</p>
-          </div>
-
-          <!-- Prize 6 -->
-          <div class="prize-card" data-prize-id="prize-6" data-prize-name="樱花手账本" style="background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: var(--shadow-card);">
-            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x1F338;</div>
-            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">樱花手账本</p>
-            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 银宝箱</p>
-          </div>
-
+        <div id="prizes-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
         </div>
       </div>
 
@@ -821,16 +777,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
 
-    function applyPrizeStates() {
-      var used = getUsedPrizes();
-      document.querySelectorAll('.prize-card[data-prize-id]').forEach(function(card) {
-        var prizeId = card.getAttribute('data-prize-id');
-        if (used[prizeId]) {
-          card.classList.add('used');
-        }
-      });
-    }
-
     try {
       DB.initUser().then(function(user) {
         if (user) {
@@ -842,16 +788,8 @@ document.addEventListener('DOMContentLoaded', function() {
               localStorage.setItem(scopedKey('sc_achievements_claimed'), JSON.stringify(ca));
             } catch(e) {}
           }
-          // Update used prizes from server
-          if (user.used_prizes) {
-            try {
-              var up = typeof user.used_prizes === 'string' ? JSON.parse(user.used_prizes) : user.used_prizes;
-              localStorage.setItem(scopedKey('sc_prizes_used'), JSON.stringify(up));
-            } catch(e) {}
-          }
           // Re-apply UI states
           applyAchievementStates();
-          applyPrizeStates();
           applyAchievementUnlockStates();
           updateStats();
         }
@@ -861,12 +799,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ========== Achievement Badges ==========
   var achievements = {
-    1: { name: '初来乍到', icon: '\u2B50', desc: '完成你的第一次每日打卡，迈出学习的第一步！每一段旅程都始于第一步。', coins: 5, locked: false, date: '2026-07-01' },
-    2: { name: '连续3天', icon: '\uD83D\uDD25', desc: '连续3天完成每日打卡任务，坚持不懈就是胜利！好习惯正在养成中。', coins: 10, locked: false, date: '2026-07-03' },
-    3: { name: '阅读小达人', icon: '\uD83D\uDCDA', desc: '累计阅读7天，书籍是通往世界的窗户。你已经打开了这扇窗！', coins: 15, locked: false, date: '2026-07-04' },
-    4: { name: '练字小能手', icon: '\u270D\uFE0F', desc: '坚持练字5天，一笔一划都是进步。你的字越来越漂亮了！', coins: 10, locked: false, date: '2026-07-03' },
-    5: { name: '学习小公主', icon: '\uD83D\uDC51', desc: '连续3天完成全部学习任务，你是当之无愧的学习小公主！', coins: 20, locked: false, date: '2026-07-04' },
-    6: { name: '满分达人', icon: '\uD83C\uDFAF', desc: '口算全对5次，又快又准！你的计算能力越来越强了！', coins: 15, locked: false, date: '2026-07-02' },
+    1: { name: '初来乍到', icon: '\uD83D\uDD12', desc: '完成你的第一次每日打卡，迈出学习的第一步！每一段旅程都始于第一步。', coins: 5, locked: true },
+    2: { name: '连续3天', icon: '\uD83D\uDD12', desc: '连续3天完成每日打卡任务，坚持不懈就是胜利！好习惯正在养成中。', coins: 10, locked: true },
+    3: { name: '阅读小达人', icon: '\uD83D\uDD12', desc: '累计阅读7天，书籍是通往世界的窗户。你已经打开了这扇窗！', coins: 15, locked: true },
+    4: { name: '练字小能手', icon: '\uD83D\uDD12', desc: '坚持练字5天，一笔一划都是进步。你的字越来越漂亮了！', coins: 10, locked: true },
+    5: { name: '学习小公主', icon: '\uD83D\uDD12', desc: '连续3天完成全部学习任务，你是当之无愧的学习小公主！', coins: 20, locked: true },
+    6: { name: '满分达人', icon: '\uD83D\uDD12', desc: '口算全对5次，又快又准！你的计算能力越来越强了！', coins: 15, locked: true },
     7: { name: '连续7天', icon: '\uD83D\uDD12', desc: '连续打卡7天，一周的坚持！毅力是最好的品质。', coins: 30, locked: true },
     8: { name: '超级学霸', icon: '\uD83D\uDD12', desc: '完成全部任务累计10天，全能学霸非你莫属！', coins: 50, locked: true },
     9: { name: '暑期冠军', icon: '\uD83D\uDD12', desc: '坚持打卡整个暑期，你是真正的冠军！', coins: 100, locked: true },
@@ -984,74 +922,9 @@ document.addEventListener('DOMContentLoaded', function() {
     showModal(id);
   });
 
-  // ========== Prize Cards ==========
-  function getUsedPrizes() {
-    try {
-      return JSON.parse(localStorage.getItem(scopedKey('sc_prizes_used')) || '{}');
-    } catch (e) {
-      return {};
-    }
-  }
-  function saveUsedPrizes(state) {
-    localStorage.setItem(scopedKey('sc_prizes_used'), JSON.stringify(state));
-    try { DB.updateUser({ used_prizes: JSON.parse(localStorage.getItem(scopedKey('sc_prizes_used')) || '{}') }); } catch(e) {}
-  }
-
-  // Restore used state on load
-  var usedPrizes = getUsedPrizes();
-  document.querySelectorAll('.prize-card[data-prize-id]').forEach(function(card) {
-    var prizeId = card.getAttribute('data-prize-id');
-    if (usedPrizes[prizeId]) {
-      card.classList.add('used');
-    }
-  });
 
   // Apply per-user achievement unlock/lock states
   applyAchievementUnlockStates();
-
-  // Click handler for prize cards
-  document.querySelectorAll('.prize-card[data-prize-id]').forEach(function(card) {
-    card.addEventListener('click', function(e) {
-      var prizeId = card.getAttribute('data-prize-id');
-      var prizeName = card.getAttribute('data-prize-name');
-      if (card.classList.contains('used') || card.classList.contains('confirming')) return;
-
-      e.stopPropagation();
-
-      // Show inline confirmation
-      card.classList.add('confirming');
-      var originalContent = card.innerHTML;
-
-      // Replace content with confirmation
-      var emoji = card.querySelector('.prize-emoji') ? card.querySelector('.prize-emoji').textContent : '';
-      card.innerHTML =
-        '<div class="prize-emoji" style="font-size:2.5rem;margin-bottom:4px;">' + emoji + '</div>' +
-        '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0;color:var(--color-text);">确定使用 ' + prizeName + '？</p>' +
-        '<div class="prize-confirm-actions">' +
-          '<button class="btn-confirm">确定</button>' +
-          '<button class="btn-cancel">取消</button>' +
-        '</div>';
-
-      var confirmBtn = card.querySelector('.btn-confirm');
-      var cancelBtn = card.querySelector('.btn-cancel');
-
-      confirmBtn.addEventListener('click', function(ev) {
-        ev.stopPropagation();
-        card.classList.remove('confirming');
-        card.classList.add('used');
-        card.innerHTML = originalContent;
-        var used = getUsedPrizes();
-        used[prizeId] = true;
-        saveUsedPrizes(used);
-      });
-
-      cancelBtn.addEventListener('click', function(ev) {
-        ev.stopPropagation();
-        card.classList.remove('confirming');
-        card.innerHTML = originalContent;
-      });
-    });
-  });
 
   // Switch user button
   var switchBtn = document.getElementById('switch-user-btn');
