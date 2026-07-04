@@ -98,7 +98,7 @@
         &#x1F3C6; 我的奖励
       </h1>
       <p style="color: rgba(255,255,255,0.9); font-size: var(--font-size-small); margin: 6px 0 0;">
-        已获得 <span style="font-weight: 700; font-size: 1.1rem;">6</span> 个奖励
+        已获得 <span style="font-weight: 700; font-size: 1.1rem;">0</span> 个奖励
       </p>
     </div>
 
@@ -113,44 +113,44 @@
             成就徽章
           </h2>
           <span style="background: var(--gradient-sunset); color: #fff; font-size: var(--font-size-xs); padding: 2px 8px; border-radius: var(--radius-full); font-weight: var(--font-weight-medium);">
-            6/15
+            0/15
           </span>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 12px;">
           <!-- Earned badges -->
           <div style="text-align: center;">
-            <div class="badge-circle earned badge-yellow" data-achievement-id="1">&#x1F31F;</div>
+            <div class="badge-circle locked badge-yellow" data-achievement-id="1">&#x1F31F;</div>
             <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">初来乍到</p>
             <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">完成首次打卡</p>
           </div>
 
           <div style="text-align: center;">
-            <div class="badge-circle earned badge-orange" data-achievement-id="2">&#x1F525;</div>
+            <div class="badge-circle locked badge-orange" data-achievement-id="2">&#x1F525;</div>
             <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">连续3天</p>
             <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">连续打卡3天</p>
           </div>
 
           <div style="text-align: center;">
-            <div class="badge-circle earned badge-blue" data-achievement-id="3">&#x1F4DA;</div>
+            <div class="badge-circle locked badge-blue" data-achievement-id="3">&#x1F4DA;</div>
             <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">阅读小达人</p>
             <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">累计阅读7天</p>
           </div>
 
           <div style="text-align: center;">
-            <div class="badge-circle earned badge-purple" data-achievement-id="4">&#x270D;&#xFE0F;</div>
+            <div class="badge-circle locked badge-purple" data-achievement-id="4">&#x270D;&#xFE0F;</div>
             <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">练字小能手</p>
             <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">练字5天</p>
           </div>
 
           <div style="text-align: center;">
-            <div class="badge-circle earned badge-golden" data-achievement-id="5">&#x1F451;</div>
+            <div class="badge-circle locked badge-golden" data-achievement-id="5">&#x1F451;</div>
             <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">学习小公主</p>
             <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">完成全部任务3天</p>
           </div>
 
           <div style="text-align: center;">
-            <div class="badge-circle earned badge-green" data-achievement-id="6">&#x1F3AF;</div>
+            <div class="badge-circle locked badge-green" data-achievement-id="6">&#x1F3AF;</div>
             <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">满分达人</p>
             <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">口算全对5次</p>
           </div>
@@ -743,8 +743,8 @@ document.addEventListener('DOMContentLoaded', function() {
   function getUnlockedAchievements() {
     try {
       var data = localStorage.getItem(scopedKey('unlocked_achievements'));
-      return data ? JSON.parse(data) : [1,2,3,4,5,6]; // Default: first 6 unlocked
-    } catch(e) { return [1,2,3,4,5,6]; }
+      return data ? JSON.parse(data) : []; // Default: all locked
+    } catch(e) { return []; }
   }
   function saveUnlockedAchievements(list) {
     try { localStorage.setItem(scopedKey('unlocked_achievements'), JSON.stringify(list)); } catch(e) {}
