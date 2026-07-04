@@ -402,6 +402,17 @@
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(0.8); }
         }
+        .cal-header { font-size: var(--font-size-xs); color: var(--color-text-tertiary); padding: 6px 0; font-weight: var(--font-weight-medium); }
+        .cal-day { font-size: var(--font-size-small); padding: 8px 0; border-radius: var(--radius-sm); cursor: pointer; position: relative; color: var(--color-text); font-family: var(--font-family-body); transition: background 0.2s; }
+        .cal-day:hover { background: var(--color-bg); }
+        .cal-day.today { background: var(--color-primary); color: var(--color-text-inverse); font-weight: var(--font-weight-title); }
+        .cal-day.other-month { color: var(--color-text-tertiary); opacity: 0.4; }
+        .cal-day .dot { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; border-radius: 50%; }
+        .cal-day .dot.full { background: var(--state-success); }
+        .cal-day .dot.partial { background: var(--state-warning); }
+        .cal-day .dot.empty { background: var(--color-border); }
+        .cal-tooltip { position: fixed; z-index: 200; background: var(--color-text); color: var(--color-text-inverse); padding: 8px 12px; border-radius: var(--radius-md); font-size: var(--font-size-xs); font-family: var(--font-family-body); pointer-events: none; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+        .cal-tooltip.show { opacity: 1; }
     </style>
 </head>
 <body>
@@ -411,7 +422,7 @@
     <header class="sticky-header">
       <div class="header-left">
         <span class="header-date-emoji">📅</span>
-        <span class="header-date-text">7月3日 星期四</span>
+        <span id="header-date" class="header-date-text"></span>
       </div>
       <div class="header-coin-badge">
         <span>💰</span>
@@ -572,6 +583,22 @@
       </div>
     </section>
 
+    <!-- ===== Checkin Calendar ===== -->
+    <section style="padding: 20px 20px 8px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <h3 style="font-size: var(--font-size-h3); font-weight: var(--font-weight-title); font-family: var(--font-family-title); color: var(--color-text); margin: 0;">打卡日历</h3>
+        <span id="calendar-streak" style="border-radius: var(--radius-full); padding: 4px 12px; font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); background: var(--gradient-candy); color: #fff;"></span>
+      </div>
+      <!-- Month navigation -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 4px;">
+        <button id="cal-prev" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--color-text-secondary); padding: 4px 8px;">◀</button>
+        <span id="cal-month-title" style="font-size: var(--font-size-body); font-weight: var(--font-weight-title); font-family: var(--font-family-title); color: var(--color-text);"></span>
+        <button id="cal-next" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--color-text-secondary); padding: 4px 8px;">▶</button>
+      </div>
+      <!-- Calendar grid -->
+      <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;"></div>
+    </section>
+
     <!-- Spacer for fixed tab bar -->
     <div class="bottom-spacer"></div>
 
@@ -620,6 +647,14 @@ document.addEventListener('DOMContentLoaded', function() {
       if (target) window.location.href = target;
     });
   });
+
+  // Set current date
+  var dateEl = document.getElementById('header-date');
+  if (dateEl) {
+    var now = new Date();
+    var weekdays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+    dateEl.textContent = (now.getMonth()+1) + '月' + now.getDate() + '日 ' + weekdays[now.getDay()];
+  }
 
   var coinCount = 6;
   var completedCount = 3;
@@ -689,8 +724,152 @@ document.addEventListener('DOMContentLoaded', function() {
       // Update header coin badge
       var headerCoin = document.querySelector('.header-coin-badge');
       if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
+      saveTodayCheckin();
     });
   });
+
+  // ===== Checkin Calendar =====
+  var calGrid = document.getElementById('calendar-grid');
+  var calTitle = document.getElementById('cal-month-title');
+  var calPrev = document.getElementById('cal-prev');
+  var calNext = document.getElementById('cal-next');
+  var calStreak = document.getElementById('calendar-streak');
+  var calTooltip = null;
+
+  // Create tooltip element
+  calTooltip = document.createElement('div');
+  calTooltip.className = 'cal-tooltip';
+  document.body.appendChild(calTooltip);
+
+  var calYear, calMonth;
+  var now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+
+  function getCheckinData() {
+    try {
+      return JSON.parse(localStorage.getItem('checkin_calendar_data') || '{}');
+    } catch(e) { return {}; }
+  }
+  function saveCheckinData(data) {
+    try { localStorage.setItem('checkin_calendar_data', JSON.stringify(data)); } catch(e) {}
+  }
+  function getTodayKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function calcStreak(data) {
+    var streak = 0;
+    var d = new Date();
+    var todayKey = getTodayKey();
+    if (!data[todayKey]) d.setDate(d.getDate() - 1);
+    while (true) {
+      var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      if (data[key] && data[key].completed > 0) {
+        streak++;
+        d.setDate(d.getDate() - 1);
+      } else break;
+      if (streak > 365) break;
+    }
+    return streak;
+  }
+
+  function renderCalendar() {
+    calGrid.innerHTML = '';
+    calTitle.textContent = calYear + '年' + (calMonth + 1) + '月';
+    var data = getCheckinData();
+    var streak = calcStreak(data);
+    calStreak.textContent = '连续打卡 ' + streak + ' 天';
+
+    var dayNames = ['日','一','二','三','四','五','六'];
+    dayNames.forEach(function(name) {
+      var h = document.createElement('div');
+      h.className = 'cal-header';
+      h.textContent = name;
+      calGrid.appendChild(h);
+    });
+
+    var firstDay = new Date(calYear, calMonth, 1).getDay();
+    var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    var prevMonthDays = new Date(calYear, calMonth, 0).getDate();
+
+    var todayKey = getTodayKey();
+    var todayDate = new Date();
+
+    for (var i = firstDay - 1; i >= 0; i--) {
+      var cell = document.createElement('div');
+      cell.className = 'cal-day other-month';
+      cell.textContent = prevMonthDays - i;
+      calGrid.appendChild(cell);
+    }
+
+    for (var d = 1; d <= daysInMonth; d++) {
+      var cell = document.createElement('div');
+      cell.className = 'cal-day';
+      cell.textContent = d;
+
+      var dateKey = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      if (dateKey === todayKey) cell.classList.add('today');
+
+      var dayDate = new Date(calYear, calMonth, d);
+      if (dayDate <= todayDate) {
+        var dot = document.createElement('div');
+        dot.className = 'dot';
+        var dayData = data[dateKey];
+        if (dayData && dayData.completed === dayData.total) dot.classList.add('full');
+        else if (dayData && dayData.completed > 0) dot.classList.add('partial');
+        else dot.classList.add('empty');
+        cell.appendChild(dot);
+
+        if (dayData) {
+          (function(key, dd) {
+            cell.addEventListener('click', function(e) {
+              var info = data[key];
+              if (!info) return;
+              calTooltip.textContent = (dd.getMonth()+1) + '月' + dd.getDate() + '日: 完成了' + info.completed + '/' + info.total + '项任务';
+              calTooltip.style.left = e.clientX + 'px';
+              calTooltip.style.top = (e.clientY - 40) + 'px';
+              calTooltip.classList.add('show');
+              setTimeout(function() { calTooltip.classList.remove('show'); }, 2000);
+            });
+          })(dateKey, dayDate);
+        }
+      }
+
+      calGrid.appendChild(cell);
+    }
+
+    var totalCells = firstDay + daysInMonth;
+    var remaining = (7 - totalCells % 7) % 7;
+    for (var i = 1; i <= remaining; i++) {
+      var cell = document.createElement('div');
+      cell.className = 'cal-day other-month';
+      cell.textContent = i;
+      calGrid.appendChild(cell);
+    }
+  }
+
+  if (calPrev) calPrev.addEventListener('click', function() {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  });
+  if (calNext) calNext.addEventListener('click', function() {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  });
+
+  renderCalendar();
+
+  function saveTodayCheckin() {
+    var data = getCheckinData();
+    var key = getTodayKey();
+    var currentCompleted = document.querySelectorAll('.task-card.completed').length;
+    data[key] = { completed: currentCompleted, total: totalTasks };
+    saveCheckinData(data);
+    renderCalendar();
+  }
 });
 </script>
 
