@@ -625,6 +625,7 @@
       </a>
     </div>
   </nav>
+<button id="switch-user-btn" style="position:fixed;bottom:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:var(--gradient-rainbow);color:#fff;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:100;display:flex;align-items:center;justify-content:center;" title="切换用户">&#x1F464;</button>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -661,66 +662,68 @@ document.addEventListener('DOMContentLoaded', function() {
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
 
-  // ===== Supabase Initialization =====
-  try {
-    DB.initUser().then(function(user) {
-      if (user && user.total_coins !== undefined && user.total_coins !== null) {
-        coinCount = user.total_coins;
-        var headerCoin = document.querySelector('.header-coin-badge');
-        if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
-      }
-      var todayKey = getTodayKey();
-      return DB.getCheckin(todayKey);
-    }).then(function(checkin) {
-      if (checkin && checkin.completed_tasks) {
-        // Restore task completion states from Supabase
-        completedCount = checkin.completed_count || 0;
-        coinCount = checkin.coins_earned || 0;
-        var cards = document.querySelectorAll('.task-card');
-        cards.forEach(function(card, i) {
-          if (checkin.completed_tasks.indexOf(i) !== -1) {
-            card.classList.remove('pending');
-            card.classList.add('completed');
-            var circle = card.querySelector('.check-circle');
-            circle.style.border = 'none';
-            circle.style.background = 'linear-gradient(135deg, #F472B6, #FB923C)';
-            circle.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-            var badges = card.querySelector('.task-badges');
-            var coinSpan = badges.querySelector('.badge-coins');
-            if (coinSpan) coinSpan.remove();
-            var doneSpan = document.createElement('span');
-            doneSpan.className = 'badge-completed';
-            doneSpan.textContent = '已完成';
-            badges.appendChild(doneSpan);
-          }
-        });
-        // Update summary
-        var summaryTitle = document.querySelector('.summary-title');
-        if (summaryTitle) summaryTitle.textContent = '今日进度: ' + completedCount + '/' + totalTasks + ' 已完成';
-        var progressFill = document.querySelector('.progress-bar-fill');
-        if (progressFill) progressFill.style.width = (completedCount / totalTasks * 100) + '%';
-        var coinsText = document.querySelector('.summary-coins-text');
-        if (coinsText) coinsText.textContent = '已获得 ' + coinCount + '枚 金币!';
-        var headerCoin = document.querySelector('.header-coin-badge');
-        if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
-      }
-      // Load all checkin data for calendar
-      return DB.getAllCheckins();
-    }).then(function(checkins) {
-      if (checkins && checkins.length > 0) {
-        checkins.forEach(function(c) {
-          allCheckinData[c.date] = { completed: c.completed_count, total: c.total_count };
-        });
-      }
+  // ===== Supabase Initialization (wrapped in ensureLogin) =====
+  ensureLogin(function(nickname) {
+    try {
+      DB.initUser().then(function(user) {
+        if (user && user.total_coins !== undefined && user.total_coins !== null) {
+          coinCount = user.total_coins;
+          var headerCoin = document.querySelector('.header-coin-badge');
+          if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
+        }
+        var todayKey = getTodayKey();
+        return DB.getCheckin(todayKey);
+      }).then(function(checkin) {
+        if (checkin && checkin.completed_tasks) {
+          // Restore task completion states from Supabase
+          completedCount = checkin.completed_count || 0;
+          coinCount = checkin.coins_earned || 0;
+          var cards = document.querySelectorAll('.task-card');
+          cards.forEach(function(card, i) {
+            if (checkin.completed_tasks.indexOf(i) !== -1) {
+              card.classList.remove('pending');
+              card.classList.add('completed');
+              var circle = card.querySelector('.check-circle');
+              circle.style.border = 'none';
+              circle.style.background = 'linear-gradient(135deg, #F472B6, #FB923C)';
+              circle.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+              var badges = card.querySelector('.task-badges');
+              var coinSpan = badges.querySelector('.badge-coins');
+              if (coinSpan) coinSpan.remove();
+              var doneSpan = document.createElement('span');
+              doneSpan.className = 'badge-completed';
+              doneSpan.textContent = '已完成';
+              badges.appendChild(doneSpan);
+            }
+          });
+          // Update summary
+          var summaryTitle = document.querySelector('.summary-title');
+          if (summaryTitle) summaryTitle.textContent = '今日进度: ' + completedCount + '/' + totalTasks + ' 已完成';
+          var progressFill = document.querySelector('.progress-bar-fill');
+          if (progressFill) progressFill.style.width = (completedCount / totalTasks * 100) + '%';
+          var coinsText = document.querySelector('.summary-coins-text');
+          if (coinsText) coinsText.textContent = '已获得 ' + coinCount + '枚 金币!';
+          var headerCoin = document.querySelector('.header-coin-badge');
+          if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
+        }
+        // Load all checkin data for calendar
+        return DB.getAllCheckins();
+      }).then(function(checkins) {
+        if (checkins && checkins.length > 0) {
+          checkins.forEach(function(c) {
+            allCheckinData[c.date] = { completed: c.completed_count, total: c.total_count };
+          });
+        }
+        renderCalendar();
+      }).catch(function(err) {
+        console.warn('Supabase init error, using local state:', err);
+        renderCalendar();
+      });
+    } catch(e) {
+      console.warn('Supabase not available, using local state:', e);
       renderCalendar();
-    }).catch(function(err) {
-      console.warn('Supabase init error, using local state:', err);
-      renderCalendar();
-    });
-  } catch(e) {
-    console.warn('Supabase not available, using local state:', e);
-    renderCalendar();
-  }
+    }
+  });
 
   // Make task cards clickable for toggle effect
   document.querySelectorAll('.task-card').forEach(function(card) {
@@ -952,6 +955,15 @@ document.addEventListener('DOMContentLoaded', function() {
     saveCheckinData(data);
     // Supabase save is handled in the task click handler above
     renderCalendar();
+  }
+
+  // Switch user button
+  var switchBtn = document.getElementById('switch-user-btn');
+  if (switchBtn) {
+    switchBtn.addEventListener('click', function() {
+      logout();
+      ensureLogin(function() { location.reload(); });
+    });
   }
 });
 </script>

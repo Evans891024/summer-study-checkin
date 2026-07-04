@@ -83,6 +83,7 @@
 
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <script src="../db.js"></script>
     <style>
         /* === Reset & Base === */
         *, *::before, *::after {
@@ -353,7 +354,7 @@
                 <div class="hero-text">
                     <h1 class="hero-title">暑期学习打卡乐园</h1>
                     <p class="hero-subtitle">和小伙伴一起快乐学习吧！</p>
-                    <p class="hero-greeting">早上好，小公主！</p>
+                    <p id="greeting-text" class="hero-greeting">早上好，小公主！</p>
                 </div>
             </section>
 
@@ -373,7 +374,7 @@
                         <div class="value">15枚</div>
                     </div>
                     <!-- Card 3: Total Coins -->
-                    <div class="stat-card" style="background: linear-gradient(135deg, #38BDF8, #7DD3FC); box-shadow: var(--shadow-card);">
+                    <div id="stat-total-coins" class="stat-card" style="background: linear-gradient(135deg, #38BDF8, #7DD3FC); box-shadow: var(--shadow-card);">
                         <div class="emoji">💰</div>
                         <div class="label">总金币</div>
                         <div class="value">128枚</div>
@@ -462,6 +463,7 @@
             <!-- Safe area for iPhone notch -->
             <div style="height: env(safe-area-inset-bottom, 0px);"></div>
         </nav>
+        <button id="switch-user-btn" style="position:fixed;bottom:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:var(--gradient-rainbow);color:#fff;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:100;display:flex;align-items:center;justify-content:center;" title="切换用户">&#x1F464;</button>
     </div>
 
 <script>
@@ -480,6 +482,36 @@ document.addEventListener('DOMContentLoaded', function() {
       if (target) window.location.href = target;
     });
   });
+
+  // Supabase init with login check
+  ensureLogin(function(nickname) {
+    try {
+      DB.initUser().then(function(user) {
+        if (user) {
+          // Update greeting with nickname
+          var greetingEl = document.getElementById('greeting-text');
+          if (greetingEl) greetingEl.textContent = '早上好，' + nickname + '！';
+          // Update total coins stat card
+          if (user.total_coins !== undefined && user.total_coins !== null) {
+            var totalCoinsCard = document.getElementById('stat-total-coins');
+            if (totalCoinsCard) {
+              var valueEl = totalCoinsCard.querySelector('.value');
+              if (valueEl) valueEl.textContent = user.total_coins + '枚';
+            }
+          }
+        }
+      }).catch(function(e) { console.warn('Supabase init failed:', e); });
+    } catch(e) {}
+  });
+
+  // Switch user button
+  var switchBtn = document.getElementById('switch-user-btn');
+  if (switchBtn) {
+    switchBtn.addEventListener('click', function() {
+      logout();
+      ensureLogin(function() { location.reload(); });
+    });
+  }
 });
 </script>
 </body>

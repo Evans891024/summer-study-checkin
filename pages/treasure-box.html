@@ -284,6 +284,8 @@
     <div style="position: absolute; bottom: 100%; left: 62.5%; transform: translateX(-50%); width: 32px; height: 4px; border-radius: var(--radius-full); background: var(--color-primary);"></div>
   </nav>
 
+<button id="switch-user-btn" style="position:fixed;bottom:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:var(--gradient-rainbow);color:#fff;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:100;display:flex;align-items:center;justify-content:center;" title="切换用户">&#x1F464;</button>
+
 
     <style>
     body {
@@ -663,39 +665,41 @@ document.addEventListener('DOMContentLoaded', function() {
     emojis = loaded.emojis;
   }
 
-  // Initialize from Supabase
-  try {
-    DB.initUser().then(function(user) {
-      if (user) {
-        coins = user.total_coins || 0;
-        // Load custom rewards from user data
-        if (user.custom_rewards) {
-          try {
-            var cr = typeof user.custom_rewards === 'string' ? JSON.parse(user.custom_rewards) : user.custom_rewards;
-            if (cr && cr.bronze) {
-              rewards.bronze = cr.bronze.names || rewards.bronze;
-              emojis.bronze = cr.bronze.emojis || emojis.bronze;
-            }
-            if (cr && cr.silver) {
-              rewards.silver = cr.silver.names || rewards.silver;
-              emojis.silver = cr.silver.emojis || emojis.silver;
-            }
-            if (cr && cr.gold) {
-              rewards.gold = cr.gold.names || rewards.gold;
-              emojis.gold = cr.gold.emojis || emojis.gold;
-            }
-          } catch(e) {}
+  // Initialize from Supabase (wrapped in ensureLogin)
+  ensureLogin(function(nickname) {
+    try {
+      DB.initUser().then(function(user) {
+        if (user) {
+          coins = user.total_coins || 0;
+          // Load custom rewards from user data
+          if (user.custom_rewards) {
+            try {
+              var cr = typeof user.custom_rewards === 'string' ? JSON.parse(user.custom_rewards) : user.custom_rewards;
+              if (cr && cr.bronze) {
+                rewards.bronze = cr.bronze.names || rewards.bronze;
+                emojis.bronze = cr.bronze.emojis || emojis.bronze;
+              }
+              if (cr && cr.silver) {
+                rewards.silver = cr.silver.names || rewards.silver;
+                emojis.silver = cr.silver.emojis || emojis.silver;
+              }
+              if (cr && cr.gold) {
+                rewards.gold = cr.gold.names || rewards.gold;
+                emojis.gold = cr.gold.emojis || emojis.gold;
+              }
+            } catch(e) {}
+          }
+          // Load daily free date from server
+          if (user.daily_free_date) {
+            serverDailyFreeDate = user.daily_free_date;
+          }
+          userDataLoaded = true;
+          updateCoinDisplay();
+          checkDailyFree();
         }
-        // Load daily free date from server
-        if (user.daily_free_date) {
-          serverDailyFreeDate = user.daily_free_date;
-        }
-        userDataLoaded = true;
-        updateCoinDisplay();
-        checkDailyFree();
-      }
-    }).catch(function(e) { console.warn('Supabase init failed:', e); });
-  } catch(e) {}
+      }).catch(function(e) { console.warn('Supabase init failed:', e); });
+    } catch(e) {}
+  });
 
   function updateCoinDisplay() {
     var badges = document.querySelectorAll('.coin-badge');
@@ -1019,6 +1023,15 @@ document.addEventListener('DOMContentLoaded', function() {
       prompt('复制以下链接发给朋友：', url);
     }
   });
+
+  // Switch user button
+  var switchBtn = document.getElementById('switch-user-btn');
+  if (switchBtn) {
+    switchBtn.addEventListener('click', function() {
+      logout();
+      ensureLogin(function() { location.reload(); });
+    });
+  }
 });
 </script>
 </body>

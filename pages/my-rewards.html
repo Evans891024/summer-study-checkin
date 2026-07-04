@@ -293,6 +293,8 @@
       </a>
     </div>
 
+    <button id="switch-user-btn" style="position:fixed;bottom:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:var(--gradient-rainbow);color:#fff;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:100;display:flex;align-items:center;justify-content:center;" title="切换用户">&#x1F464;</button>
+
     <!-- Achievement Detail Modal -->
     <div id="achievement-detail-modal" class="achievement-modal-overlay" style="display: none;">
       <div class="achievement-modal-content">
@@ -693,65 +695,67 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // ========== Supabase Sync ==========
-  var serverUser = null;
+  // ========== Supabase Sync (wrapped in ensureLogin) ==========
+  ensureLogin(function(nickname) {
+    var serverUser = null;
 
-  function updateStats() {
-    try {
-      DB.getAllCheckins().then(function(checkins) {
-        var statItems = document.querySelectorAll('.stat-value');
-        if (statItems[0] && checkins) statItems[0].textContent = checkins.length + '天';
-        if (statItems[1] && serverUser) statItems[1].textContent = (serverUser.total_coins || 0) + '枚';
+    function updateStats() {
+      try {
+        DB.getAllCheckins().then(function(checkins) {
+          var statItems = document.querySelectorAll('.stat-value');
+          if (statItems[0] && checkins) statItems[0].textContent = checkins.length + '天';
+          if (statItems[1] && serverUser) statItems[1].textContent = (serverUser.total_coins || 0) + '枚';
+        });
+      } catch(e) {}
+    }
+
+    function applyAchievementStates() {
+      var claimed = getClaimedState();
+      document.querySelectorAll('.badge-circle[data-achievement-id]').forEach(function(badge) {
+        var id = badge.getAttribute('data-achievement-id');
+        if (claimed[id]) {
+          badge.style.outline = '2px solid var(--color-accent-green)';
+          badge.style.outlineOffset = '2px';
+        }
       });
+    }
+
+    function applyPrizeStates() {
+      var used = getUsedPrizes();
+      document.querySelectorAll('.prize-card[data-prize-id]').forEach(function(card) {
+        var prizeId = card.getAttribute('data-prize-id');
+        if (used[prizeId]) {
+          card.classList.add('used');
+        }
+      });
+    }
+
+    try {
+      DB.initUser().then(function(user) {
+        if (user) {
+          serverUser = user;
+          // Update claimed achievements from server
+          if (user.claimed_achievements) {
+            try {
+              var ca = typeof user.claimed_achievements === 'string' ? JSON.parse(user.claimed_achievements) : user.claimed_achievements;
+              localStorage.setItem('sc_achievements_claimed', JSON.stringify(ca));
+            } catch(e) {}
+          }
+          // Update used prizes from server
+          if (user.used_prizes) {
+            try {
+              var up = typeof user.used_prizes === 'string' ? JSON.parse(user.used_prizes) : user.used_prizes;
+              localStorage.setItem('sc_prizes_used', JSON.stringify(up));
+            } catch(e) {}
+          }
+          // Re-apply UI states
+          applyAchievementStates();
+          applyPrizeStates();
+          updateStats();
+        }
+      }).catch(function(e) { console.warn('Supabase init failed:', e); });
     } catch(e) {}
-  }
-
-  function applyAchievementStates() {
-    var claimed = getClaimedState();
-    document.querySelectorAll('.badge-circle[data-achievement-id]').forEach(function(badge) {
-      var id = badge.getAttribute('data-achievement-id');
-      if (claimed[id]) {
-        badge.style.outline = '2px solid var(--color-accent-green)';
-        badge.style.outlineOffset = '2px';
-      }
-    });
-  }
-
-  function applyPrizeStates() {
-    var used = getUsedPrizes();
-    document.querySelectorAll('.prize-card[data-prize-id]').forEach(function(card) {
-      var prizeId = card.getAttribute('data-prize-id');
-      if (used[prizeId]) {
-        card.classList.add('used');
-      }
-    });
-  }
-
-  try {
-    DB.initUser().then(function(user) {
-      if (user) {
-        serverUser = user;
-        // Update claimed achievements from server
-        if (user.claimed_achievements) {
-          try {
-            var ca = typeof user.claimed_achievements === 'string' ? JSON.parse(user.claimed_achievements) : user.claimed_achievements;
-            localStorage.setItem('sc_achievements_claimed', JSON.stringify(ca));
-          } catch(e) {}
-        }
-        // Update used prizes from server
-        if (user.used_prizes) {
-          try {
-            var up = typeof user.used_prizes === 'string' ? JSON.parse(user.used_prizes) : user.used_prizes;
-            localStorage.setItem('sc_prizes_used', JSON.stringify(up));
-          } catch(e) {}
-        }
-        // Re-apply UI states
-        applyAchievementStates();
-        applyPrizeStates();
-        updateStats();
-      }
-    }).catch(function(e) { console.warn('Supabase init failed:', e); });
-  } catch(e) {}
+  });
 
   // ========== Achievement Badges ==========
   var achievements = {
@@ -937,6 +941,15 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   });
+
+  // Switch user button
+  var switchBtn = document.getElementById('switch-user-btn');
+  if (switchBtn) {
+    switchBtn.addEventListener('click', function() {
+      logout();
+      ensureLogin(function() { location.reload(); });
+    });
+  }
 
 });
 </script>
