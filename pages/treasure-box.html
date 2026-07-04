@@ -493,10 +493,9 @@
       </select>
       <button id="custom-reward-add" style="border-radius:var(--radius-md); padding:10px 16px; font-size:var(--font-size-small); font-weight:var(--font-weight-title); color:#fff; border:none; cursor:pointer; background:var(--gradient-rainbow); font-family:var(--font-family-title);">添加</button>
     </div>
-    <!-- Share & Reset buttons -->
-    <div style="display:flex; gap:8px; margin-top:12px;">
-      <button id="custom-rewards-share" style="flex:1; border-radius:var(--radius-md); padding:8px; font-size:var(--font-size-xs); font-weight:var(--font-weight-medium); color:#fff; border:none; cursor:pointer; background:var(--gradient-rainbow); font-family:var(--font-family-body);">分享配置链接</button>
-      <button id="custom-rewards-reset" style="flex:1; border-radius:var(--radius-md); padding:8px; font-size:var(--font-size-xs); color:var(--color-text-tertiary); border:1px solid var(--color-border); cursor:pointer; background:transparent; font-family:var(--font-family-body);">恢复默认奖励</button>
+    <!-- Reset button -->
+    <div style="margin-top:12px;">
+      <button id="custom-rewards-reset" style="width:100%;border-radius:var(--radius-md); padding:8px; font-size:var(--font-size-xs); color:var(--color-text-tertiary); border:1px solid var(--color-border); cursor:pointer; background:transparent; font-family:var(--font-family-body);">恢复默认奖励</button>
     </div>
   </div>
 </div>
@@ -617,19 +616,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch(e) {}
     return null;
   }
-  function loadRewardsFromURL() {
-    try {
-      var params = new URLSearchParams(window.location.search);
-      var data = params.get('rewards');
-      if (data) {
-        var decoded = JSON.parse(decodeURIComponent(atob(data)));
-        if (decoded.rewards && decoded.emojis) {
-          return decoded;
-        }
-      }
-    } catch(e) {}
-    return null;
-  }
   function saveRewards() {
     try {
       localStorage.setItem('treasure_rewards', JSON.stringify(rewards));
@@ -646,21 +632,10 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     } catch(e) {}
   }
-  function generateShareURL() {
-    var data = { rewards: rewards, emojis: emojis };
-    var encoded = btoa(encodeURIComponent(JSON.stringify(data)));
-    var base = window.location.href.split('?')[0];
-    return base + '?rewards=' + encoded;
-  }
 
-  // Priority: URL params > localStorage > defaults
-  var urlConfig = loadRewardsFromURL();
+  // Priority: localStorage > defaults
   var loaded = loadRewards();
-  if (urlConfig) {
-    rewards = urlConfig.rewards;
-    emojis = urlConfig.emojis;
-    saveRewards();
-  } else if (loaded) {
+  if (loaded) {
     rewards = loaded.rewards;
     emojis = loaded.emojis;
   }
@@ -1007,21 +982,6 @@ document.addEventListener('DOMContentLoaded', function() {
     emojis = JSON.parse(JSON.stringify(defaultEmojis));
     saveRewards();
     renderCustomRewardsList();
-  });
-  // Share rewards URL
-  var shareBtn = document.getElementById('custom-rewards-share');
-  if (shareBtn) shareBtn.addEventListener('click', function() {
-    var url = generateShareURL();
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(function() {
-        shareBtn.textContent = '已复制链接!';
-        setTimeout(function() { shareBtn.textContent = '分享配置链接'; }, 2000);
-      }).catch(function() {
-        prompt('复制以下链接发给朋友：', url);
-      });
-    } else {
-      prompt('复制以下链接发给朋友：', url);
-    }
   });
 
   // Switch user button
