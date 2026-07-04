@@ -118,19 +118,19 @@
         </div>
       </div>
 
-      <h2 style="font-size: var(--font-size-h2); font-weight: var(--font-weight-title); margin: 16px 0 8px; font-family: var(--font-family-title); color: var(--color-text);">神秘宝箱</h2>
+      <h2 style="font-size: var(--font-size-h2); font-weight: var(--font-weight-title); margin: 16px 0 8px; font-family: var(--font-family-title); color: var(--color-text);">每日免费宝箱</h2>
 
-      <div style="display: inline-flex; align-items: center; gap: 4px; border-radius: var(--radius-full); padding: 4px 16px; font-size: var(--font-size-small); font-weight: var(--font-weight-title); margin-bottom: 16px; background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #78350F; font-family: var(--font-family-title);">
-        10枚/次 &#x1F4B0;
+      <div id="daily-free-badge" style="display: inline-flex; align-items: center; gap: 4px; border-radius: var(--radius-full); padding: 4px 16px; font-size: var(--font-size-small); font-weight: var(--font-weight-title); margin-bottom: 16px; background: linear-gradient(135deg, #34D399, #38BDF8); color: #fff; font-family: var(--font-family-title);">
+        今日免费 &#x2728;
       </div>
 
       <div style="margin-top: 8px; margin-bottom: 8px;">
-        <button class="glow-btn" style="border-radius: var(--radius-full); padding: 16px 48px; font-size: var(--font-size-h2); font-weight: var(--font-weight-title); color: #fff; border: none; cursor: pointer; background: var(--gradient-sunset); font-family: var(--font-family-title); letter-spacing: 0.1em;">
-          开 箱
+        <button id="daily-free-btn" class="glow-btn" style="border-radius: var(--radius-full); padding: 16px 48px; font-size: var(--font-size-h2); font-weight: var(--font-weight-title); color: #fff; border: none; cursor: pointer; background: var(--gradient-ocean); font-family: var(--font-family-title); letter-spacing: 0.1em;">
+          免费开启
         </button>
       </div>
 
-      <p style="font-size: var(--font-size-small); margin-top: 8px; color: var(--color-text-secondary); font-family: var(--font-family-body);">试试今天的运气吧！</p>
+      <p id="daily-free-hint" style="font-size: var(--font-size-small); margin-top: 8px; color: var(--color-text-secondary); font-family: var(--font-family-body);">每天可以免费开一次，别忘记哦！</p>
     </section>
 
     <!-- ===== Reward Tiers Section ===== -->
@@ -720,12 +720,84 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 2500);
   }
 
-  // Main "开箱" button
-  var glowBtn = document.querySelector('.glow-btn');
-  if (glowBtn) {
-    glowBtn.addEventListener('click', function(e) {
+  // Daily free box logic
+  var dailyFreeBtn = document.getElementById('daily-free-btn');
+  var dailyFreeBadge = document.getElementById('daily-free-badge');
+  var dailyFreeHint = document.getElementById('daily-free-hint');
+  function checkDailyFree() {
+    try {
+      var lastDate = localStorage.getItem('daily_free_date');
+      var today = new Date().toISOString().split('T')[0];
+      if (lastDate === today) {
+        dailyFreeBtn.textContent = '明天再来';
+        dailyFreeBtn.style.background = '#D1D5DB';
+        dailyFreeBtn.style.cursor = 'not-allowed';
+        dailyFreeBadge.textContent = '今日已开';
+        dailyFreeBadge.style.background = 'linear-gradient(135deg, #D1D5DB, #9CA3AF)';
+        dailyFreeHint.textContent = '明天再来领取免费宝箱吧！';
+        return false;
+      }
+    } catch(e) {}
+    return true;
+  }
+  checkDailyFree();
+  if (dailyFreeBtn) {
+    dailyFreeBtn.addEventListener('click', function(e) {
       e.preventDefault();
-      openBox('silver', 10);
+      if (!checkDailyFree()) return;
+      // Use a special pool that combines all tiers
+      var allRewards = rewards.bronze.concat(rewards.silver).concat(rewards.gold);
+      var allEmojis = emojis.bronze.concat(emojis.silver).concat(emojis.gold);
+      if (allRewards.length === 0) return;
+      var idx = Math.floor(Math.random() * allRewards.length);
+      var reward = allRewards[idx];
+      var emoji = allEmojis[idx];
+
+      var overlay = document.getElementById('opening-overlay');
+      var chest = document.getElementById('opening-chest');
+      var reveal = document.getElementById('opening-reveal');
+      chest.className = 'opening-chest';
+      reveal.className = 'opening-reveal';
+      chest.innerHTML = '&#x2728;';
+      overlay.classList.add('active');
+
+      var particleInterval = setInterval(function() {
+        if (!overlay.classList.contains('active')) { clearInterval(particleInterval); return; }
+        var sparkles = ['\u2728', '\uD83D\uDCAB', '\u2B50', '\uD83C\uDF1F', '\uD83C\uDF08'];
+        var p = document.createElement('span');
+        p.className = 'opening-particle';
+        p.textContent = sparkles[Math.floor(Math.random() * sparkles.length)];
+        var angle = Math.random() * Math.PI * 2;
+        var dist = 60 + Math.random() * 80;
+        p.style.left = 'calc(50% + ' + (Math.random() * 60 - 30) + 'px)';
+        p.style.top = 'calc(50% + ' + (Math.random() * 60 - 30) + 'px)';
+        p.style.setProperty('--px', Math.cos(angle) * dist + 'px');
+        p.style.setProperty('--py', Math.sin(angle) * dist + 'px');
+        p.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
+        overlay.appendChild(p);
+        setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, 1500);
+      }, 200);
+
+      setTimeout(function() {
+        clearInterval(particleInterval);
+        chest.classList.add('hidden');
+        reveal.innerHTML = emoji;
+        reveal.className = 'opening-reveal active';
+      }, 1500);
+
+      setTimeout(function() {
+        overlay.classList.remove('active');
+        document.getElementById('modal-animation').textContent = emoji;
+        document.getElementById('modal-title').textContent = '免费宝箱!';
+        document.getElementById('modal-reward').textContent = reward;
+        document.getElementById('modal-coin-change').textContent = '免费获得';
+        document.getElementById('treasure-modal').style.display = 'flex';
+        // Mark today as used
+        try {
+          localStorage.setItem('daily_free_date', new Date().toISOString().split('T')[0]);
+          checkDailyFree();
+        } catch(e) {}
+      }, 2500);
     });
   }
 
