@@ -485,6 +485,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Supabase init with login check
   ensureLogin(function(nickname) {
+    // One-time migration: clear old unscoped localStorage keys
+    try {
+      if (!localStorage.getItem('app_v2_migrated')) {
+        var keysToRemove = ['claimed_achievements', 'used_prizes', 'unlocked_achievements',
+          'treasure_rewards', 'treasure_emojis', 'daily_free_date', 'checkin_calendar_data',
+          'user_code'];
+        keysToRemove.forEach(function(k) { localStorage.removeItem(k); });
+        // Also remove any keys that start with old patterns (unscoped)
+        Object.keys(localStorage).forEach(function(k) {
+          if (k.indexOf('claimed_achievements') === 0 || k.indexOf('used_prizes') === 0 ||
+              k.indexOf('unlocked_achievements') === 0 || k.indexOf('treasure_rewards') === 0 ||
+              k.indexOf('treasure_emojis') === 0 || k.indexOf('daily_free_date') === 0 ||
+              k.indexOf('checkin_calendar_data') === 0 || k === 'user_code') {
+            localStorage.removeItem(k);
+          }
+        });
+        localStorage.setItem('app_v2_migrated', '1');
+      }
+    } catch(e) {}
     try {
       DB.initUser().then(function(user) {
         if (user) {
