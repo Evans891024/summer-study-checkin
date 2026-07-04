@@ -1,0 +1,137 @@
+{
+  "project": {
+    "name": "暑期学习打卡乐园",
+    "operation": "create",
+    "designRead": "mobile app / elementary school girl / playful candy toy-like / medium density / avoid dark moody colors",
+    "designDials": {
+      "layoutVariance": 3,
+      "motionIntensity": 3,
+      "visualDensity": 2
+    },
+    "designSource": {
+      "mode": "free-explore",
+      "styleConstraints": {
+        "radiusMax": 16,
+        "staticShadowAlphaMax": 0.05
+      }
+    },
+    "generationTree": {
+      "root": {
+        "nodeId": "gen-project-shell",
+        "kind": "project-shell",
+        "pageIds": ["page-home", "page-daily-checkin", "page-treasure-box", "page-my-rewards"],
+        "output": "partials/project-shell.html",
+        "status": "planned",
+        "children": [
+          {
+            "nodeId": "gen-page-home",
+            "kind": "page-leaf",
+            "pageIds": ["page-home"],
+            "output": "pages/home.html",
+            "status": "planned"
+          },
+          {
+            "nodeId": "gen-page-daily-checkin",
+            "kind": "page-leaf",
+            "pageIds": ["page-daily-checkin"],
+            "output": "pages/daily-checkin.html",
+            "status": "planned"
+          },
+          {
+            "nodeId": "gen-page-treasure-box",
+            "kind": "page-leaf",
+            "pageIds": ["page-treasure-box"],
+            "output": "pages/treasure-box.html",
+            "status": "planned"
+          },
+          {
+            "nodeId": "gen-page-my-rewards",
+            "kind": "page-leaf",
+            "pageIds": ["page-my-rewards"],
+            "output": "pages/my-rewards.html",
+            "status": "planned"
+          }
+        ]
+      }
+    }
+  },
+  "pages": [
+    {
+      "nodeId": "page-home",
+      "title": "乐园首页",
+      "htmlSrc": "pages/home.html",
+      "pageIndex": 1,
+      "visualNorthStar": "Rainbow candy wonderland with bouncing animations and star particles",
+      "compositionPattern": "centered-hero-with-card-grid",
+      "imagePlan": ["hero-candy-land.jpg"],
+      "continuityAnchors": {
+        "typographySystem": "ZCOOL KuaiLe + Noto Sans SC",
+        "colorSystem": "rainbow candy pink-purple-blue palette",
+        "radiusScale": "rounded 8/12/16px",
+        "surfaceModel": "white cards with soft pink shadows"
+      }
+    },
+    {
+      "nodeId": "page-daily-checkin",
+      "title": "每日打卡",
+      "htmlSrc": "pages/daily-checkin.html",
+      "pageIndex": 2,
+      "visualNorthStar": "Fun checklist with colorful task cards and golden coin rewards",
+      "compositionPattern": "scrollable-list-with-fixed-header",
+      "imagePlan": [],
+      "continuityAnchors": {
+        "typographySystem": "ZCOOL KuaiLe + Noto Sans SC",
+        "colorSystem": "rainbow candy pink-purple-blue palette",
+        "radiusScale": "rounded 8/12/16px",
+        "surfaceModel": "white cards with soft pink shadows"
+      }
+    },
+    {
+      "nodeId": "page-treasure-box",
+      "title": "金币宝箱",
+      "htmlSrc": "pages/treasure-box.html",
+      "pageIndex": 3,
+      "visualNorthStar": "Sparkling treasure chest with coin animation and reward reveal",
+      "compositionPattern": "centered-feature-with-grid",
+      "imagePlan": ["treasure-chest.jpg"],
+      "continuityAnchors": {
+        "typographySystem": "ZCOOL KuaiLe + Noto Sans SC",
+        "colorSystem": "rainbow candy pink-purple-blue palette",
+        "radiusScale": "rounded 8/12/16px",
+        "surfaceModel": "white cards with soft pink shadows"
+      }
+    },
+    {
+      "nodeId": "page-my-rewards",
+      "title": "我的奖励",
+      "htmlSrc": "pages/my-rewards.html",
+      "pageIndex": 4,
+      "visualNorthStar": "Trophy shelf with achievement badges and prize collection",
+      "compositionPattern": "collection-grid-with-stats",
+      "imagePlan": [],
+      "continuityAnchors": {
+        "typographySystem": "ZCOOL KuaiLe + Noto Sans SC",
+        "colorSystem": "rainbow candy pink-purple-blue palette",
+        "radiusScale": "rounded 8/12/16px",
+        "surfaceModel": "white cards with soft pink shadows"
+      }
+    }
+  ],
+  "assets": [],
+  "wiringPlan": [
+    { "from": "page-home", "domId": "nav-daily-checkin", "to": "page-daily-checkin" },
+    { "from": "page-home", "domId": "cta-start-today", "to": "page-daily-checkin" },
+    { "from": "page-home", "domId": "nav-treasure-box", "to": "page-treasure-box" },
+    { "from": "page-home", "domId": "nav-my-rewards", "to": "page-my-rewards" },
+    { "from": "page-daily-checkin", "domId": "nav-home", "to": "page-home" },
+    { "from": "page-daily-checkin", "domId": "nav-treasure-box", "to": "page-treasure-box" },
+    { "from": "page-daily-checkin", "domId": "nav-my-rewards", "to": "page-my-rewards" },
+    { "from": "page-treasure-box", "domId": "nav-home", "to": "page-home" },
+    { "from": "page-treasure-box", "domId": "nav-daily-checkin", "to": "page-daily-checkin" },
+    { "from": "page-treasure-box", "domId": "nav-my-rewards", "to": "page-my-rewards" },
+    { "from": "page-my-rewards", "domId": "nav-home", "to": "page-home" },
+    { "from": "page-my-rewards", "domId": "nav-daily-checkin", "to": "page-daily-checkin" },
+    { "from": "page-my-rewards", "domId": "nav-treasure-box", "to": "page-treasure-box" }
+  ],
+  "hiddenInteractionPlan": []
+}

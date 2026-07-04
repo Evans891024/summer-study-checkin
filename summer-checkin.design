@@ -1,0 +1,173 @@
+{
+  "data": [
+    {
+      "id": "page-home",
+      "title": "乐园首页",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1783087700000,
+      "canvasData": {
+        "x": 0,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/home.html",
+        "interactions": [
+          {
+            "domId": "cta-start-today",
+            "targetPageId": "page-daily-checkin",
+            "transitionLabel": "开始今日打卡"
+          },
+          {
+            "domId": "nav-daily-checkin",
+            "targetPageId": "page-daily-checkin",
+            "transitionLabel": "去打卡"
+          },
+          {
+            "domId": "nav-treasure-box",
+            "targetPageId": "page-treasure-box",
+            "transitionLabel": "开宝箱"
+          },
+          {
+            "domId": "nav-my-rewards",
+            "targetPageId": "page-my-rewards",
+            "transitionLabel": "我的奖励"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-daily-checkin",
+      "title": "每日打卡",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1783087700000,
+      "canvasData": {
+        "x": 620,
+        "y": 0,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/daily-checkin.html",
+        "interactions": [
+          {
+            "domId": "nav-home",
+            "targetPageId": "page-home",
+            "transitionLabel": "回首页",
+            "hideEdge": true
+          },
+          {
+            "domId": "nav-treasure-box",
+            "targetPageId": "page-treasure-box",
+            "transitionLabel": "开宝箱"
+          },
+          {
+            "domId": "nav-my-rewards",
+            "targetPageId": "page-my-rewards",
+            "transitionLabel": "我的奖励"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-treasure-box",
+      "title": "金币宝箱",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1783087700000,
+      "canvasData": {
+        "x": 620,
+        "y": 386,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/treasure-box.html",
+        "interactions": [
+          {
+            "domId": "nav-home",
+            "targetPageId": "page-home",
+            "transitionLabel": "回首页",
+            "hideEdge": true
+          },
+          {
+            "domId": "nav-daily-checkin",
+            "targetPageId": "page-daily-checkin",
+            "transitionLabel": "去打卡"
+          },
+          {
+            "domId": "nav-my-rewards",
+            "targetPageId": "page-my-rewards",
+            "transitionLabel": "我的奖励"
+          }
+        ]
+      }
+    },
+    {
+      "id": "page-my-rewards",
+      "title": "我的奖励",
+      "type": "page",
+      "version": 1,
+      "createdAt": 1783087700000,
+      "canvasData": {
+        "x": 620,
+        "y": 927,
+        "group": 0
+      },
+      "devMetadata": {
+        "htmlSrc": "pages/my-rewards.html",
+        "interactions": [
+          {
+            "domId": "nav-home",
+            "targetPageId": "page-home",
+            "transitionLabel": "回首页",
+            "hideEdge": true
+          },
+          {
+            "domId": "nav-daily-checkin",
+            "targetPageId": "page-daily-checkin",
+            "transitionLabel": "去打卡"
+          },
+          {
+            "domId": "nav-treasure-box",
+            "targetPageId": "page-treasure-box",
+            "transitionLabel": "开宝箱"
+          }
+        ]
+      }
+    },
+    {
+      "id": "image-001",
+      "title": "糖果乐园主视觉",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1783087800000,
+      "canvasData": {
+        "x": 0,
+        "y": 1478
+      },
+      "devMetadata": {
+        "imageSrc": "assets/hero-candy-land.jpg"
+      }
+    },
+    {
+      "id": "image-002",
+      "title": "宝箱奖励",
+      "type": "image",
+      "version": 1,
+      "createdAt": 1783087800000,
+      "canvasData": {
+        "x": 620,
+        "y": 1478
+      },
+      "devMetadata": {
+        "imageSrc": "assets/treasure-chest.jpg"
+      }
+    }
+  ],
+  "config": {
+    "autoLayout": true,
+    "deviceType": "desktop",
+    "projectName": "暑期学习打卡乐园"
+  }
+}

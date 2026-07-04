@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的奖励</title>
+    <style id="theme-vars">
+:root {
+  /* Brand Colors — Rainbow Candy */
+  --color-primary: #FF6B9D;
+  --color-primary-light: #FF8FB5;
+  --color-primary-dark: #E5507F;
+  --color-secondary: #A855F7;
+  --color-tertiary: #38BDF8;
+  --color-accent-yellow: #FBBF24;
+  --color-accent-green: #34D399;
+  --color-accent-orange: #FB923C;
+  --color-accent-pink: #F472B6;
+  --color-bg: #FFF7ED;
+  --color-bg-warm: #FFF1F5;
+  --color-bg-cool: #EFF6FF;
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #FFF5F7;
+  --color-border: #FDE8EF;
+  --color-border-soft: #FCE7F3;
+  --color-text: #1F2937;
+  --color-text-secondary: #6B7280;
+  --color-text-tertiary: #9CA3AF;
+  --color-text-inverse: #FFFFFF;
+  --state-success: #34D399;
+  --state-warning: #FBBF24;
+  --state-error: #F87171;
+  --state-info: #38BDF8;
+
+  /* Gradient candies */
+  --gradient-rainbow: linear-gradient(135deg, #FF6B9D, #A855F7, #38BDF8);
+  --gradient-candy: linear-gradient(135deg, #F472B6, #FB923C);
+  --gradient-sunset: linear-gradient(135deg, #FBBF24, #FF6B9D);
+  --gradient-ocean: linear-gradient(135deg, #38BDF8, #34D399);
+  --gradient-purple: linear-gradient(135deg, #A855F7, #F472B6);
+
+  /* Typography */
+  --font-family-title: "ZCOOL KuaiLe", "Noto Sans SC", system-ui, sans-serif;
+  --font-family-body: "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  --font-size-display: 2.5rem;
+  --font-size-h1: 2rem;
+  --font-size-h2: 1.5rem;
+  --font-size-h3: 1.25rem;
+  --font-size-body: 1rem;
+  --font-size-small: 0.875rem;
+  --font-size-xs: 0.75rem;
+  --font-weight-title: 700;
+  --font-weight-body: 400;
+  --font-weight-medium: 500;
+  --line-height-heading: 1.3;
+  --line-height-body: 1.6;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-card: 0 4px 16px rgba(255,107,157,0.08);
+  --shadow-float: 0 8px 24px rgba(168,85,247,0.12);
+
+  /* Brand prefix */
+  --brand-prefix: sc;
+}
+
+/* Dark mode is not needed for this children's app */
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Header -->
+    <div style="background: var(--gradient-rainbow); padding: 20px 20px 24px; text-align: center; position: relative; overflow: hidden;">
+      <!-- Decorative circles -->
+      <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.15);"></div>
+      <div style="position: absolute; bottom: -15px; left: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.1);"></div>
+
+      <h1 style="font-family: var(--font-family-title); font-size: 1.75rem; color: #fff; margin: 0; text-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        &#x1F3C6; 我的奖励
+      </h1>
+      <p style="color: rgba(255,255,255,0.9); font-size: var(--font-size-small); margin: 6px 0 0;">
+        已获得 <span style="font-weight: 700; font-size: 1.1rem;">12</span> 个奖励
+      </p>
+    </div>
+
+    <!-- Main content -->
+    <div style="padding: 20px 16px 100px;">
+
+      <!-- Achievement Badges Section -->
+      <div style="margin-bottom: 28px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+          <span style="font-size: 1.25rem;">&#x1F396;&#xFE0F;</span>
+          <h2 style="font-family: var(--font-family-title); font-size: var(--font-size-h3); margin: 0; color: var(--color-text);">
+            成就徽章
+          </h2>
+          <span style="background: var(--gradient-sunset); color: #fff; font-size: var(--font-size-xs); padding: 2px 8px; border-radius: var(--radius-full); font-weight: var(--font-weight-medium);">
+            6/9
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 12px;">
+          <!-- Earned badges -->
+          <div style="text-align: center;">
+            <div class="badge-circle earned badge-yellow">&#x1F31F;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">初来乍到</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">完成首次打卡</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div class="badge-circle earned badge-orange">&#x1F525;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">连续3天</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">连续打卡3天</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div class="badge-circle earned badge-blue">&#x1F4DA;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">阅读小达人</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">累计阅读7天</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div class="badge-circle earned badge-purple">&#x270D;&#xFE0F;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">练字小能手</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">练字5天</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div class="badge-circle earned badge-golden">&#x1F451;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">学习小公主</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">完成全部任务3天</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div class="badge-circle earned badge-green">&#x1F3AF;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text);">满分达人</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0;">口算全对5次</p>
+          </div>
+
+          <!-- Locked badges -->
+          <div style="text-align: center;">
+            <div class="badge-circle locked">&#x1F512;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text-tertiary);">连续7天</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0; font-style: italic;">即将解锁</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div class="badge-circle locked">&#x1F512;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text-tertiary);">超级学霸</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0; font-style: italic;">即将解锁</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div class="badge-circle locked">&#x1F512;</div>
+            <p style="font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); margin: 8px 0 2px; color: var(--color-text-tertiary);">暑期冠军</p>
+            <p style="font-size: 0.65rem; color: var(--color-text-tertiary); margin: 0; font-style: italic;">即将解锁</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prize Collection Section -->
+      <div style="margin-bottom: 28px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+          <span style="font-size: 1.25rem;">&#x1F381;</span>
+          <h2 style="font-family: var(--font-family-title); font-size: var(--font-size-h3); margin: 0; color: var(--color-text);">
+            宝箱战利品
+          </h2>
+          <span style="background: var(--gradient-purple); color: #fff; font-size: var(--font-size-xs); padding: 2px 8px; border-radius: var(--radius-full); font-weight: var(--font-weight-medium);">
+            6件
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+
+          <!-- Prize 1 -->
+          <div class="prize-card" style="background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: var(--shadow-card);">
+            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x1F380;</div>
+            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">粉色蝴蝶结</p>
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 铜宝箱</p>
+          </div>
+
+          <!-- Prize 2 -->
+          <div class="prize-card" style="background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: var(--shadow-card);">
+            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x1F308;</div>
+            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">彩虹贴纸套装</p>
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 银宝箱</p>
+          </div>
+
+          <!-- Prize 3 -->
+          <div class="prize-card prize-card-golden" style="background: var(--color-surface); border: 1px solid #FDE68A; border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: 0 4px 16px rgba(251,191,36,0.15);">
+            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x1F451;</div>
+            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">公主皇冠发卡</p>
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 金宝箱</p>
+          </div>
+
+          <!-- Prize 4 -->
+          <div class="prize-card" style="background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: var(--shadow-card);">
+            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x1F4D6;</div>
+            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">绘本故事书</p>
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 金宝箱</p>
+          </div>
+
+          <!-- Prize 5 -->
+          <div class="prize-card" style="background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: var(--shadow-card);">
+            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x270F;&#xFE0F;</div>
+            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">彩色铅笔套装</p>
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 银宝箱</p>
+          </div>
+
+          <!-- Prize 6 -->
+          <div class="prize-card" style="background: var(--color-surface); border: 1px solid var(--color-border-soft); border-radius: var(--radius-lg); padding: 16px 12px; text-align: center; box-shadow: var(--shadow-card);">
+            <div class="prize-emoji" style="font-size: 2.5rem; margin-bottom: 8px;">&#x1F338;</div>
+            <p style="font-size: var(--font-size-small); font-weight: var(--font-weight-medium); margin: 0 0 4px; color: var(--color-text);">樱花手账本</p>
+            <p style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin: 0;">来自 银宝箱</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Stats Overview Section -->
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+          <span style="font-size: 1.25rem;">&#x1F4CA;</span>
+          <h2 style="font-family: var(--font-family-title); font-size: var(--font-size-h3); margin: 0; color: var(--color-text);">
+            我的成绩
+          </h2>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F4C5;</div>
+            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-primary); margin: 0;">12天</div>
+            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">打卡天数</div>
+          </div>
+
+          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1FA99;</div>
+            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-accent-yellow); margin: 0;">128枚</div>
+            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">获得金币</div>
+          </div>
+
+          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F381;</div>
+            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-secondary); margin: 0;">8次</div>
+            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">开启宝箱</div>
+          </div>
+
+          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F3C6;</div>
+            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-accent-green); margin: 0;">6个</div>
+            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">收集奖励</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Tab Bar -->
+    <div class="tab-bar">
+      <a href="#" class="tab-item" data-dom-id="nav-home">
+        <span class="tab-emoji">&#x1F3E0;</span>
+        <span>首页</span>
+      </a>
+      <a href="#" class="tab-item" data-dom-id="nav-daily-checkin">
+        <span class="tab-emoji">&#x1F4CB;</span>
+        <span>打卡</span>
+      </a>
+      <a href="#" class="tab-item" data-dom-id="nav-treasure-box">
+        <span class="tab-emoji">&#x1F381;</span>
+        <span>宝箱</span>
+      </a>
+      <a href="#" class="tab-item active" data-dom-id="nav-my-rewards">
+        <span class="tab-emoji">&#x1F3C6;</span>
+        <span>奖励</span>
+      </a>
+    </div>
+
+  </div>
+
+    <style>
+    body {
+      font-family: var(--font-family-body);
+      background: var(--color-bg);
+      color: var(--color-text);
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container {
+      max-width: 768px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      background: var(--color-bg);
+    }
+
+    /* Badge glow animations */
+    @keyframes glow-pulse {
+      0%, 100% { box-shadow: 0 0 12px 4px rgba(251, 191, 36, 0.4); }
+      50% { box-shadow: 0 0 20px 8px rgba(251, 191, 36, 0.6); }
+    }
+    @keyframes glow-orange {
+      0%, 100% { box-shadow: 0 0 12px 4px rgba(251, 146, 60, 0.4); }
+      50% { box-shadow: 0 0 20px 8px rgba(251, 146, 60, 0.6); }
+    }
+    @keyframes glow-blue {
+      0%, 100% { box-shadow: 0 0 12px 4px rgba(56, 189, 248, 0.4); }
+      50% { box-shadow: 0 0 20px 8px rgba(56, 189, 248, 0.6); }
+    }
+    @keyframes glow-purple {
+      0%, 100% { box-shadow: 0 0 12px 4px rgba(168, 85, 247, 0.4); }
+      50% { box-shadow: 0 0 20px 8px rgba(168, 85, 247, 0.6); }
+    }
+    @keyframes glow-golden {
+      0%, 100% { box-shadow: 0 0 16px 6px rgba(251, 191, 36, 0.5), 0 0 30px 10px rgba(255, 107, 157, 0.2); }
+      50% { box-shadow: 0 0 24px 10px rgba(251, 191, 36, 0.7), 0 0 40px 16px rgba(255, 107, 157, 0.3); }
+    }
+    @keyframes glow-green {
+      0%, 100% { box-shadow: 0 0 12px 4px rgba(52, 211, 153, 0.4); }
+      50% { box-shadow: 0 0 20px 8px rgba(52, 211, 153, 0.6); }
+    }
+    @keyframes shine {
+      0% { background-position: -100% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes sparkle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .badge-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .badge-circle.earned {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .badge-circle.earned::after {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
+      background-size: 200% 100%;
+      animation: shine 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .badge-circle.locked {
+      border: 2px dashed #D1D5DB;
+      background: #F3F4F6;
+      opacity: 0.65;
+      animation: none;
+    }
+    .badge-circle.locked::after {
+      display: none;
+    }
+
+    .badge-yellow { background: linear-gradient(135deg, #FEF3C7, #FDE68A); animation-name: glow-pulse; }
+    .badge-orange { background: linear-gradient(135deg, #FFEDD5, #FDBA74); animation-name: glow-orange; }
+    .badge-blue { background: linear-gradient(135deg, #DBEAFE, #93C5FD); animation-name: glow-blue; }
+    .badge-purple { background: linear-gradient(135deg, #EDE9FE, #C4B5FD); animation-name: glow-purple; }
+    .badge-golden { background: linear-gradient(135deg, #FEF3C7, #FBBF24, #F59E0B); animation-name: glow-golden; }
+    .badge-green { background: linear-gradient(135deg, #D1FAE5, #6EE7B7); animation-name: glow-green; }
+
+    /* Prize card sparkle */
+    .prize-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .prize-card:active {
+      transform: scale(0.97);
+    }
+
+    .prize-card-golden .prize-emoji {
+      animation: sparkle 2s ease-in-out infinite;
+    }
+
+    /* Tab bar */
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 768px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--color-border-soft);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+      z-index: 50;
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 0.65rem;
+      color: var(--color-text-tertiary);
+      text-decoration: none;
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s;
+    }
+    .tab-item.active {
+      color: var(--color-primary);
+    }
+    .tab-item .tab-emoji {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+    .tab-item.hidden {
+      visibility: hidden;
+      pointer-events: none;
+    }
+  </style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var navMap = {
+    'nav-home': 'home.html',
+    'nav-daily-checkin': 'daily-checkin.html',
+    'nav-treasure-box': 'treasure-box.html',
+    'nav-my-rewards': 'my-rewards.html'
+  };
+  document.querySelectorAll('[data-dom-id]').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = navMap[el.getAttribute('data-dom-id')];
+      if (target) window.location.href = target;
+    });
+  });
+});
+</script>
+</body>
+</html>
