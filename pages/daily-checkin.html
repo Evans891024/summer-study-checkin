@@ -1157,6 +1157,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('user-reset-btn').addEventListener('click', function() {
     if (!confirm('确定要重置今日打卡吗？今天已打卡的项目将全部恢复为未完成。')) return;
     // Reset task cards to pending
+    var coinsToDeduct = todayCoins;
     document.querySelectorAll('.task-card.completed').forEach(function(card) {
       card.classList.remove('completed', 'just-completed');
       card.classList.add('pending');
@@ -1189,7 +1190,7 @@ document.addEventListener('DOMContentLoaded', function() {
     delete data[todayKey];
     saveCheckinData(data);
     renderCalendar();
-    try { DB.saveCheckin(todayKey, [], 0, totalTasks, 0); DB.updateUser({ total_coins: coinCount - todayCoins }); coinCount -= todayCoins; } catch(e) {}
+    try { DB.saveCheckin(todayKey, [], 0, totalTasks, 0); DB.updateUser({ total_coins: coinCount - coinsToDeduct }); coinCount -= coinsToDeduct; } catch(e) {}
     var headerCoin = document.querySelector('.header-coin-badge');
     if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
   });

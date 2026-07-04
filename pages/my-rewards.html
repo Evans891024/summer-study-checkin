@@ -101,7 +101,7 @@
         &#x1F3C6; 我的奖励
       </h1>
       <p style="color: rgba(255,255,255,0.9); font-size: var(--font-size-small); margin: 6px 0 0;">
-        已获得 <span style="font-weight: 700; font-size: 1.1rem;">0</span> 个奖励
+        已获得 <span id="header-reward-count" style="font-weight: 700; font-size: 1.1rem;">0</span> 个奖励
       </p>
     </div>
 
@@ -115,7 +115,7 @@
           <h2 style="font-family: var(--font-family-title); font-size: var(--font-size-h3); margin: 0; color: var(--color-text);">
             成就徽章
           </h2>
-          <span style="background: var(--gradient-sunset); color: #fff; font-size: var(--font-size-xs); padding: 2px 8px; border-radius: var(--radius-full); font-weight: var(--font-weight-medium);">
+          <span id="achievement-progress" style="background: var(--gradient-sunset); color: #fff; font-size: var(--font-size-xs); padding: 2px 8px; border-radius: var(--radius-full); font-weight: var(--font-weight-medium);">
             0/15
           </span>
         </div>
@@ -750,51 +750,62 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (parentDiv) {
           var ps = parentDiv.querySelectorAll('p');
-          if (ps[1]) ps[1].textContent = achievements[id] ? achievements[id].desc : '';
+          // p[0] is name (keep as is), p[1] is description
+          if (ps.length > 1 && ps[1]) ps[1].textContent = achievements[id] ? achievements[id].desc : '';
+          if (ps.length > 1 && ps[1]) ps[1].style.color = ''; // restore from tertiary
+          if (ps.length > 1 && ps[1]) ps[1].style.fontStyle = '';
         }
       } else {
         circle.classList.remove('earned');
         circle.classList.add('locked');
-        if (achievements[id] && achievements[id].icon === '\uD83D\uDD12') {
-          // keep lock icon
-        } else if (id > 6) {
-          circle.textContent = '\uD83D\uDD12';
-        }
+        // Always reset to lock icon for locked achievements
+        circle.textContent = '\uD83D\uDD12';
         if (parentDiv) {
           var ps2 = parentDiv.querySelectorAll('p');
-          if (ps2[1]) ps2[1].textContent = '即将解锁';
+          if (ps2.length > 1 && ps2[1]) {
+            ps2[1].textContent = '即将解锁';
+            ps2[1].style.color = 'var(--color-text-tertiary)';
+            ps2[1].style.fontStyle = 'italic';
+          }
         }
       }
     });
+  }
+
+  // ========== External updateStats (accessible everywhere) ==========
+  function refreshStats() {
+    try {
+      DB.getAllCheckins().then(function(checkins) {
+        var days = checkins ? checkins.length : 0;
+        var daysEl = document.getElementById('stat-checkin-days');
+        if (daysEl) { var v = daysEl.querySelector('.stat-value'); if (v) v.textContent = days + '天'; }
+        DB.getUser().then(function(user) {
+          if (user) {
+            var coinsEl = document.getElementById('stat-total-coins-rewards');
+            if (coinsEl) { var v2 = coinsEl.querySelector('.stat-value'); if (v2) v2.textContent = (user.total_coins || 0) + '枚'; }
+            var claimed = typeof user.claimed_achievements === 'string' ? JSON.parse(user.claimed_achievements) : (user.claimed_achievements || {});
+            var wonPrizes = typeof user.won_prizes === 'string' ? JSON.parse(user.won_prizes) : (user.won_prizes || []);
+            var claimedCount = 0; for (var k in claimed) { if (claimed.hasOwnProperty(k)) claimedCount++; }
+            var collEl = document.getElementById('stat-collected-rewards');
+            if (collEl) { var v3 = collEl.querySelector('.stat-value'); if (v3) v3.textContent = (claimedCount + wonPrizes.length) + '个'; }
+            var boxOpens = user.box_opens || 0;
+            var boxEl = document.getElementById('stat-box-opens');
+            if (boxEl) { var v4 = boxEl.querySelector('.stat-value'); if (v4) v4.textContent = boxOpens + '次'; }
+            var hr = document.getElementById('header-reward-count');
+            if (hr) hr.textContent = (claimedCount + wonPrizes.length);
+            var ap = document.getElementById('achievement-progress');
+            if (ap) ap.textContent = claimedCount + '/15';
+          }
+        });
+      });
+    } catch(e) {}
   }
 
   // ========== Supabase Sync (wrapped in ensureLogin) ==========
   ensureLogin(function(nickname) {
     var serverUser = null;
 
-    function updateStats() {
-      try {
-        DB.getAllCheckins().then(function(checkins) {
-          var days = checkins ? checkins.length : 0;
-          var daysEl = document.getElementById('stat-checkin-days');
-          if (daysEl) { var v = daysEl.querySelector('.stat-value'); if (v) v.textContent = days + '天'; }
-          if (serverUser) {
-            var coinsEl = document.getElementById('stat-total-coins-rewards');
-            if (coinsEl) { var v2 = coinsEl.querySelector('.stat-value'); if (v2) v2.textContent = (serverUser.total_coins || 0) + '枚'; }
-            var claimed = typeof serverUser.claimed_achievements === 'string' ? JSON.parse(serverUser.claimed_achievements) : (serverUser.claimed_achievements || {});
-            var wonPrizes = typeof serverUser.won_prizes === 'string' ? JSON.parse(serverUser.won_prizes) : (serverUser.won_prizes || []);
-            var claimedCount = 0; for (var k in claimed) { if (claimed.hasOwnProperty(k)) claimedCount++; }
-            var collEl = document.getElementById('stat-collected-rewards');
-            if (collEl) { var v3 = collEl.querySelector('.stat-value'); if (v3) v3.textContent = (claimedCount + wonPrizes.length) + '个'; }
-            var boxOpens = serverUser.box_opens || 0;
-            var boxEl = document.getElementById('stat-box-opens');
-            if (boxEl) { var v4 = boxEl.querySelector('.stat-value'); if (v4) v4.textContent = boxOpens + '次'; }
-          }
-          // Also read from localStorage as fallback
-          renderPrizes();
-        });
-      } catch(e) {}
-    }
+    function updateStats() { refreshStats(); }
 
     function applyAchievementStates() {
       var claimed = getClaimedState();
@@ -811,72 +822,80 @@ document.addEventListener('DOMContentLoaded', function() {
       try {
         var wonStr = localStorage.getItem(scopedKey('won_prizes'));
         var won = wonStr ? JSON.parse(wonStr) : [];
-        // Also try from serverUser
-        if (serverUser && serverUser.won_prizes && won.length === 0) {
-          won = typeof serverUser.won_prizes === 'string' ? JSON.parse(serverUser.won_prizes) : serverUser.won_prizes;
-        }
-        // Load used state
-        var usedPrizes = {};
-        try { var up = localStorage.getItem(scopedKey('used_prizes')); if (up) usedPrizes = JSON.parse(up); } catch(e) {}
-        if (serverUser && serverUser.used_prizes && Object.keys(usedPrizes).length === 0) {
-          usedPrizes = typeof serverUser.used_prizes === 'string' ? JSON.parse(serverUser.used_prizes) : (serverUser.used_prizes || {});
-        }
-        var grid = document.getElementById('prizes-grid');
-        var section = document.getElementById('prizes-section');
-        var countEl = document.getElementById('prize-count');
-        if (!grid) return;
-        if (won.length === 0) { if (section) section.style.display = 'none'; return; }
-        if (section) section.style.display = 'block';
-        if (countEl) countEl.textContent = won.length + '件';
-        grid.innerHTML = '';
-        won.slice(-6).reverse().forEach(function(p, idx) {
-          var boxClass = p.type === 'gold' ? 'prize-card-golden' : '';
-          var borderColor = p.type === 'gold' ? '#FDE68A' : p.type === 'silver' ? '#BFDBFE' : '#FED7AA';
-          var boxShadow = p.type === 'gold' ? '0 4px 16px rgba(251,191,36,0.15)' : 'var(--shadow-card)';
-          var prizeKey = 'won-' + p.date + '-' + p.name + '-' + idx;
-          var isUsed = !!usedPrizes[prizeKey];
-          var card = document.createElement('div');
-          card.className = 'prize-card ' + boxClass + (isUsed ? ' used' : '');
-          card.setAttribute('data-prize-key', prizeKey);
-          card.style.cssText = 'background:var(--color-surface);border:1px solid ' + borderColor + ';border-radius:var(--radius-lg);padding:16px 12px;text-align:center;box-shadow:' + boxShadow + ';cursor:pointer;position:relative;overflow:hidden;';
-          card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + p.emoji + '</div>'
-            + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
-            + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>'
-            + (isUsed ? '<div style="position:absolute;top:4px;right:4px;background:#34D399;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">已用</div>' : '');
-          card.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (card.classList.contains('used')) return;
-            if (card.classList.contains('confirming')) return;
-            card.classList.add('confirming');
-            var originalContent = card.innerHTML;
-            var emoji = p.emoji;
-            card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:4px;">' + emoji + '</div>'
-              + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 6px;color:var(--color-text);">确定使用 ' + p.name + '？</p>'
-              + '<div style="display:flex;gap:8px;justify-content:center;">'
-              + '<button class="btn-confirm" style="padding:4px 14px;border-radius:12px;border:none;background:#34D399;color:#fff;cursor:pointer;font-size:12px;font-family:inherit;">确定</button>'
-              + '<button class="btn-cancel" style="padding:4px 14px;border-radius:12px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;font-family:inherit;">取消</button>'
-              + '</div>';
-            card.querySelector('.btn-confirm').addEventListener('click', function(ev) {
-              ev.stopPropagation();
-              card.classList.remove('confirming');
-              card.classList.add('used');
-              usedPrizes[prizeKey] = true;
-              localStorage.setItem(scopedKey('used_prizes'), JSON.stringify(usedPrizes));
-              DB.updateUser({ used_prizes: usedPrizes });
-              card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + emoji + '</div>'
-                + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
-                + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>'
-                + '<div style="position:absolute;top:4px;right:4px;background:#34D399;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">已用</div>';
-            });
-            card.querySelector('.btn-cancel').addEventListener('click', function(ev) {
-              ev.stopPropagation();
-              card.classList.remove('confirming');
-              card.innerHTML = originalContent;
-            });
-          });
-          grid.appendChild(card);
+        DB.getUser().then(function(dbUser) {
+          var serverWon = null;
+          if (dbUser && dbUser.won_prizes) {
+            serverWon = typeof dbUser.won_prizes === 'string' ? JSON.parse(dbUser.won_prizes) : dbUser.won_prizes;
+          }
+          if (serverWon && serverWon.length > 0 && won.length === 0) {
+            won = serverWon;
+          }
+          var usedPrizes = {};
+          try { var up = localStorage.getItem(scopedKey('used_prizes')); if (up) usedPrizes = JSON.parse(up); } catch(e) {}
+          if (dbUser && dbUser.used_prizes && Object.keys(usedPrizes).length === 0) {
+            usedPrizes = typeof dbUser.used_prizes === 'string' ? JSON.parse(dbUser.used_prizes) : (dbUser.used_prizes || {});
+          }
+          renderPrizeGrid(won, usedPrizes);
         });
       } catch(e) {}
+    }
+
+    function renderPrizeGrid(won, usedPrizes) {
+      var grid = document.getElementById('prizes-grid');
+      var section = document.getElementById('prizes-section');
+      var countEl = document.getElementById('prize-count');
+      if (!grid) return;
+      if (won.length === 0) { if (section) section.style.display = 'none'; return; }
+      if (section) section.style.display = 'block';
+      if (countEl) countEl.textContent = won.length + '件';
+      grid.innerHTML = '';
+      won.slice(-6).reverse().forEach(function(p, idx) {
+        var boxClass = p.type === 'gold' ? 'prize-card-golden' : '';
+        var borderColor = p.type === 'gold' ? '#FDE68A' : p.type === 'silver' ? '#BFDBFE' : '#FED7AA';
+        var boxShadow = p.type === 'gold' ? '0 4px 16px rgba(251,191,36,0.15)' : 'var(--shadow-card)';
+        var prizeKey = 'won-' + p.date + '-' + p.name + '-' + idx;
+        var isUsed = !!usedPrizes[prizeKey];
+        var card = document.createElement('div');
+        card.className = 'prize-card ' + boxClass + (isUsed ? ' used' : '');
+        card.setAttribute('data-prize-key', prizeKey);
+        card.style.cssText = 'background:var(--color-surface);border:1px solid ' + borderColor + ';border-radius:var(--radius-lg);padding:16px 12px;text-align:center;box-shadow:' + boxShadow + ';cursor:pointer;position:relative;overflow:hidden;';
+        card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + p.emoji + '</div>'
+          + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
+          + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>'
+          + (isUsed ? '<div style="position:absolute;top:4px;right:4px;background:#34D399;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">已用</div>' : '');
+        card.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (card.classList.contains('used')) return;
+          if (card.classList.contains('confirming')) return;
+          card.classList.add('confirming');
+          var originalContent = card.innerHTML;
+          var emoji = p.emoji;
+          card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:4px;">' + emoji + '</div>'
+            + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 6px;color:var(--color-text);">确定使用 ' + p.name + '？</p>'
+            + '<div style="display:flex;gap:8px;justify-content:center;">'
+            + '<button class="btn-confirm" style="padding:4px 14px;border-radius:12px;border:none;background:#34D399;color:#fff;cursor:pointer;font-size:12px;font-family:inherit;">确定</button>'
+            + '<button class="btn-cancel" style="padding:4px 14px;border-radius:12px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;font-family:inherit;">取消</button>'
+            + '</div>';
+          card.querySelector('.btn-confirm').addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            card.classList.remove('confirming');
+            card.classList.add('used');
+            usedPrizes[prizeKey] = true;
+            localStorage.setItem(scopedKey('used_prizes'), JSON.stringify(usedPrizes));
+            DB.updateUser({ used_prizes: usedPrizes });
+            card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + emoji + '</div>'
+              + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
+              + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>'
+              + '<div style="position:absolute;top:4px;right:4px;background:#34D399;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">已用</div>';
+          });
+          card.querySelector('.btn-cancel').addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            card.classList.remove('confirming');
+            card.innerHTML = originalContent;
+          });
+        });
+        grid.appendChild(card);
+      });
     }
 
     try {
@@ -1045,11 +1064,11 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       var a = achievements[currentAchievementId];
       var coinsToAdd = a ? a.coins : 0;
-      // First get current user to add coins
       DB.getUser().then(function(user) {
         if (user) {
           var newTotal = (user.total_coins || 0) + coinsToAdd;
           DB.updateUser({ total_coins: newTotal, claimed_achievements: state });
+          setTimeout(function() { refreshStats(); }, 300);
         }
       });
     } catch(e) {}
@@ -1149,6 +1168,8 @@ document.addEventListener('DOMContentLoaded', function() {
     saveClaimedState(claimed);
     // Refresh modal to show claimed state
     showModal(id);
+    // Refresh all stats
+    setTimeout(function() { refreshStats(); }, 500);
   });
 
 
