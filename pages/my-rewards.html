@@ -1189,14 +1189,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   document.getElementById('user-cache-btn').addEventListener('click', function() {
-    if (!confirm('清除本地缓存后，页面会重新从服务器加载最新数据。确定清除？')) return;
-    try {
-      var keys = [scopedKey('won_prizes'), scopedKey('used_prizes'), scopedKey('unlocked_achievements'),
-        scopedKey('sc_achievements_claimed'), scopedKey('checkin_calendar_data'),
-        scopedKey('sc_prizes_used'), 'app_v3_migrated'];
-      keys.forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
-    } catch(e) {}
-    location.reload();
+    if (!confirm('\u26A0\uFE0F 警告：此操作将清空数据库中你的全部数据（打卡记录、金币、成就、奖品等），并且不可恢复！\n\n确定要继续吗？')) return;
+    if (!confirm('真的要全部清空吗？数据删除后无法找回！')) return;
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '清除中...';
+    DB.clearUserData().then(function(success) {
+      if (success) {
+        location.reload();
+      } else {
+        alert('清除失败，请重试');
+        btn.disabled = false;
+        btn.textContent = '清除缓存';
+      }
+    });
   });
 
 });

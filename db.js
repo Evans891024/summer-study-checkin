@@ -220,5 +220,42 @@ var DB = {
         'order': 'date.desc'
       });
     });
+  },
+
+  // 清空用户全量数据（打卡记录 + 个人数据）
+  clearUserData: function() {
+    if (!DB.nickname) return Promise.resolve(false);
+    return DB.getUser().then(function(user) {
+      if (!user) return false;
+      // 1. 删除所有打卡记录
+      return sbFetch('checkins', 'DELETE', null, {
+        'user_code': 'eq.' + user.user_code
+      }).then(function() {
+        // 2. 重置用户字段
+        return sbFetch('users', 'PATCH', {
+          total_coins: 0,
+          claimed_achievements: {},
+          used_prizes: [],
+          daily_free_date: ''
+        }, {
+          'user_code': 'eq.' + user.user_code
+        });
+      }).then(function() {
+        // 3. 清空 localStorage（所有作用域下的 key）
+        var keysToRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          if (key && (key.indexOf('_prizes') !== -1 || key.indexOf('unlocked_') !== -1 ||
+              key.indexOf('_achievements') !== -1 || key.indexOf('checkin_') !== -1 ||
+              key.indexOf('_data') !== -1 || key.indexOf('daily_free') !== -1 ||
+              key.indexOf('box_opens') !== -1 || key.indexOf('scoped_') !== -1 ||
+              key.indexOf('_used') !== -1 || key === 'app_v3_migrated')) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
+        return true;
+      });
+    });
   }
 };
