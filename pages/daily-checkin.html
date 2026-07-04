@@ -1117,13 +1117,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.task-card').forEach(function(tc, ti) {
       if (tc.classList.contains('completed')) completedIndices.push(ti);
     });
-    // Calculate coins from badge text
-    var totalCoins = 0;
-    document.querySelectorAll('.task-card.completed').forEach(function(card) {
-      var ct = card.querySelector('.badge-coins');
-      if (ct) totalCoins += parseInt(ct.textContent) || 0;
-    });
-    data[key] = { completed: currentCompleted, total: totalTasks, tasks: completedIndices, coins: totalCoins };
+    data[key] = { completed: currentCompleted, total: totalTasks, tasks: completedIndices, coins: todayCoins };
     saveCheckinData(data);
     renderCalendar();
   }

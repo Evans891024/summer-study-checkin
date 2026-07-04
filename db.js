@@ -27,6 +27,8 @@ function sbFetch(table, method, body, query) {
   if (body) opts.body = JSON.stringify(body);
   return fetch(url, opts).then(function(r) {
     if (!r.ok) throw new Error('Supabase error: ' + r.status);
+    // DELETE/204 and some PATCH responses have no body
+    if (r.status === 204 || r.status === 205) return null;
     return r.json();
   });
 }
