@@ -284,27 +284,27 @@
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
+          <div id="stat-checkin-days" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
             <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F4C5;</div>
-            <div class="stat-value" style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-primary); margin: 0;">12天</div>
+            <div class="stat-value" style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-primary); margin: 0;">0天</div>
             <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">打卡天数</div>
           </div>
 
-          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
+          <div id="stat-total-coins-rewards" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
             <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F4B0;</div>
-            <div class="stat-value" style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-accent-yellow); margin: 0;">128枚</div>
+            <div class="stat-value" style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-accent-yellow); margin: 0;">0枚</div>
             <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">获得金币</div>
           </div>
 
-          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
+          <div id="stat-box-opens" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
             <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F381;</div>
-            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-secondary); margin: 0;">8次</div>
+            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-secondary); margin: 0;">0次</div>
             <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">开启宝箱</div>
           </div>
 
-          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
+          <div id="stat-collected-rewards" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
             <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F3C6;</div>
-            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-accent-green); margin: 0;">6个</div>
+            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-accent-green); margin: 0;">0个</div>
             <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">收集奖励</div>
           </div>
         </div>
@@ -793,9 +793,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateStats() {
       try {
         DB.getAllCheckins().then(function(checkins) {
-          var statItems = document.querySelectorAll('.stat-value');
-          if (statItems[0] && checkins) statItems[0].textContent = checkins.length + '天';
-          if (statItems[1] && serverUser) statItems[1].textContent = (serverUser.total_coins || 0) + '枚';
+          var days = checkins ? checkins.length : 0;
+          var daysEl = document.getElementById('stat-checkin-days');
+          if (daysEl) { var v = daysEl.querySelector('.stat-value'); if (v) v.textContent = days + '天'; }
+          if (serverUser) {
+            var coinsEl = document.getElementById('stat-total-coins-rewards');
+            if (coinsEl) { var v2 = coinsEl.querySelector('.stat-value'); if (v2) v2.textContent = (serverUser.total_coins || 0) + '枚'; }
+            var claimed = typeof serverUser.claimed_achievements === 'string' ? JSON.parse(serverUser.claimed_achievements) : (serverUser.claimed_achievements || {});
+            var usedPrizes = typeof serverUser.used_prizes === 'string' ? JSON.parse(serverUser.used_prizes) : (serverUser.used_prizes || []);
+            // Count claimed achievements + used prizes as "collected rewards"
+            var claimedCount = 0; for (var k in claimed) { if (claimed.hasOwnProperty(k)) claimedCount++; }
+            var collEl = document.getElementById('stat-collected-rewards');
+            if (collEl) { var v3 = collEl.querySelector('.stat-value'); if (v3) v3.textContent = (claimedCount + usedPrizes.length) + '个'; }
+          }
         });
       } catch(e) {}
     }

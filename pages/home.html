@@ -365,22 +365,22 @@
             <section class="stats-section">
                 <div class="stats-row">
                     <!-- Card 1: Streak -->
-                    <div class="stat-card" style="background: linear-gradient(135deg, #FF6B9D, #FF8FB5); box-shadow: var(--shadow-card);">
+                    <div id="stat-streak" class="stat-card" style="background: linear-gradient(135deg, #FF6B9D, #FF8FB5); box-shadow: var(--shadow-card);">
                         <div class="emoji">🔥</div>
                         <div class="label">连续打卡</div>
-                        <div class="value">7天</div>
+                        <div class="value">0天</div>
                     </div>
                     <!-- Card 2: Today's Coins -->
-                    <div class="stat-card" style="background: linear-gradient(135deg, #A855F7, #C084FC); box-shadow: var(--shadow-card);">
+                    <div id="stat-today-coins" class="stat-card" style="background: linear-gradient(135deg, #A855F7, #C084FC); box-shadow: var(--shadow-card);">
                         <div class="emoji">💰</div>
                         <div class="label">今日金币</div>
-                        <div class="value">15枚</div>
+                        <div class="value">0枚</div>
                     </div>
                     <!-- Card 3: Total Coins -->
                     <div id="stat-total-coins" class="stat-card" style="background: linear-gradient(135deg, #38BDF8, #7DD3FC); box-shadow: var(--shadow-card);">
                         <div class="emoji">💰</div>
                         <div class="label">总金币</div>
-                        <div class="value">128枚</div>
+                        <div class="value">0枚</div>
                     </div>
                 </div>
             </section>
@@ -530,8 +530,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
           }
         }
-      }).catch(function(e) { console.warn('Supabase init failed:', e); });
-    } catch(e) {}
+      });
+      // Fetch real data for streak and today's coins
+      var todayKey = new Date().getFullYear() + '-' + String(new Date().getMonth()+1).padStart(2,'0') + '-' + String(new Date().getDate()).padStart(2,'0');
+      DB.getAllCheckins().then(function(checkins) {
+        // Calculate streak
+        var streak = 0;
+        var d = new Date();
+        if (checkins && checkins.length > 0) {
+          var data = {};
+          checkins.forEach(function(c) { data[c.date] = c; });
+          if (!data[todayKey]) d.setDate(d.getDate() - 1);
+          while (true) {
+            var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            if (data[key] && data[key].completed_count > 0) { streak++; d.setDate(d.getDate() - 1); }
+            else break;
+            if (streak > 365) break;
+          }
+        }
+        var streakCard = document.getElementById('stat-streak');
+        if (streakCard) { var sv = streakCard.querySelector('.value'); if (sv) sv.textContent = streak + '天'; }
+      });
+      DB.getCheckin(todayKey).then(function(checkin) {
+        var todayCoinsEl = document.getElementById('stat-today-coins');
+        if (todayCoinsEl) {
+          var tv = todayCoinsEl.querySelector('.value');
+          if (tv) tv.textContent = (checkin ? (checkin.coins_earned || 0) : 0) + '枚';
+        }
+      });
+    } catch(e) { console.warn('Supabase init failed:', e); }
   });
 
   // Switch user button
