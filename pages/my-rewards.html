@@ -892,11 +892,12 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           // Check achievements from real data
           DB.getAllCheckins().then(function(checkins) {
+            var unlocked = getUnlockedAchievements();
+            var taskIndicesByDate = {};
             if (checkins && checkins.length > 0) {
-              var unlocked = getUnlockedAchievements();
-              var taskIndicesByDate = {};
               checkins.forEach(function(c) { taskIndicesByDate[c.date] = c.completed_tasks || []; });
-              var dates = Object.keys(taskIndicesByDate).sort();
+            }
+            var dates = Object.keys(taskIndicesByDate).sort();
               // 1: 初来乍到 — first checkin
               if (unlocked.indexOf(1) === -1) { unlocked.push(1); }
               // 2: 连续3天 — check consecutive dates
@@ -1003,7 +1004,6 @@ document.addEventListener('DOMContentLoaded', function() {
               }
               // 10: 早鸟之星 — can't check time from data, skip
               saveUnlockedAchievements(unlocked);
-            }
             applyAchievementUnlockStates();
           });
           // Re-apply UI states
