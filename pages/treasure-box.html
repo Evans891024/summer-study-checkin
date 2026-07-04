@@ -939,11 +939,50 @@ document.addEventListener('DOMContentLoaded', function() {
     renderCustomRewardsList();
   }
 
-  // Open custom rewards modal
+  // Open custom rewards modal (parent password required)
+  var parentPwd = localStorage.getItem('parent_pwd') || '8888';
   var customBtn = document.getElementById('custom-rewards-btn');
   if (customBtn) customBtn.addEventListener('click', function() {
-    switchTab(currentTab);
-    document.getElementById('custom-rewards-modal').style.display = 'flex';
+    // Ask for parent password
+    var pwdModal = document.createElement('div');
+    pwdModal.style.cssText = 'position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;';
+    var pwdCard = document.createElement('div');
+    pwdCard.style.cssText = 'background:#fff;border-radius:20px;padding:28px 24px;width:300px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.15);font-family:var(--font-family-body);';
+    pwdCard.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">&#x1F512;</div>'
+      + '<h3 style="margin:0 0 6px;font-size:1.1rem;font-family:var(--font-family-title);color:var(--color-text);">家长验证</h3>'
+      + '<p style="margin:0 0 16px;font-size:var(--font-size-small);color:var(--color-text-tertiary);">请输入家长密码</p>'
+      + '<input id="parent-pwd-input" type="password" maxlength="8" placeholder="输入密码" style="width:100%;padding:12px 16px;border:2px solid var(--color-border);border-radius:12px;font-size:1rem;outline:none;text-align:center;font-family:inherit;box-sizing:border-box;">'
+      + '<p id="parent-pwd-error" style="margin:8px 0 0;font-size:var(--font-size-xs);color:var(--state-error);display:none;">密码错误</p>'
+      + '<div style="display:flex;gap:8px;margin-top:16px;">'
+      + '<button id="parent-pwd-cancel" style="flex:1;padding:12px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:#fff;cursor:pointer;font-family:var(--font-family-body);font-size:var(--font-size-body);color:var(--color-text-secondary);">取消</button>'
+      + '<button id="parent-pwd-ok" style="flex:1;padding:12px;border:none;border-radius:var(--radius-md);background:var(--gradient-candy);color:#fff;cursor:pointer;font-family:var(--font-family-title);font-size:var(--font-size-body);">确认</button>'
+      + '</div>';
+    pwdModal.appendChild(pwdCard);
+    document.body.appendChild(pwdModal);
+
+    var pwdInput = document.getElementById('parent-pwd-input');
+    setTimeout(function() { pwdInput.focus(); }, 100);
+
+    function closePwd() { pwdModal.remove(); }
+    document.getElementById('parent-pwd-cancel').addEventListener('click', closePwd);
+    pwdModal.addEventListener('click', function(e) { if (e.target === pwdModal) closePwd(); });
+
+    document.getElementById('parent-pwd-ok').addEventListener('click', function() {
+      var input = pwdInput.value;
+      if (input === parentPwd) {
+        closePwd();
+        switchTab(currentTab);
+        document.getElementById('custom-rewards-modal').style.display = 'flex';
+      } else {
+        document.getElementById('parent-pwd-error').style.display = 'block';
+        pwdInput.style.borderColor = 'var(--state-error)';
+        pwdInput.value = '';
+        pwdInput.focus();
+      }
+    });
+    pwdInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') document.getElementById('parent-pwd-ok').click();
+    });
   });
   // Close custom rewards modal
   var customClose = document.getElementById('custom-rewards-close');
