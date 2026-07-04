@@ -661,6 +661,7 @@
       <span id="user-nickname-label" style="color:var(--color-primary); font-family:var(--font-family-title); font-weight:var(--font-weight-title);">然然</span> 已登录
     </span>
     <div style="display:flex; gap:6px;">
+      <button id="user-cache-btn" style="padding:4px 10px; border-radius:var(--radius-full); border:1px solid var(--color-border); background:var(--color-surface); cursor:pointer; font-size:10px; color:var(--color-text-tertiary); font-family:var(--font-family-body);">清除缓存</button>
       <button id="user-switch-btn" style="padding:4px 12px; border-radius:var(--radius-full); border:1px solid var(--color-border); background:var(--color-surface); cursor:pointer; font-size:var(--font-size-xs); color:var(--color-text-secondary); font-family:var(--font-family-body);">切换用户</button>
       <button id="user-reset-btn" style="padding:4px 12px; border-radius:var(--radius-full); border:1px solid #FCA5A5; background:#FEF2F2; cursor:pointer; font-size:var(--font-size-xs); color:var(--state-error); font-family:var(--font-family-body);">重置今日打卡</button>
     </div>
@@ -1197,6 +1198,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Init user bar after login
   initUserBar();
+
+  // Clear cache button
+  document.getElementById('user-cache-btn').addEventListener('click', function() {
+    if (!confirm('清除本地缓存后，页面会重新从服务器加载最新数据。确定清除？')) return;
+    var keys = [scopedKey('won_prizes'), scopedKey('used_prizes'), scopedKey('unlocked_achievements'),
+      scopedKey('sc_achievements_claimed'), scopedKey('checkin_calendar_data'), 'app_v3_migrated'];
+    keys.forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
+    location.reload();
+  });
 });
 </script>
 

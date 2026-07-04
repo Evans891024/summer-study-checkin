@@ -254,6 +254,7 @@
       <span id="user-nickname-label" style="color:var(--color-primary); font-family:var(--font-family-title); font-weight:var(--font-weight-title);">然然</span> 已登录
     </span>
     <div style="display:flex; gap:6px;">
+      <button id="user-cache-btn" style="padding:4px 10px; border-radius:var(--radius-full); border:1px solid var(--color-border); background:var(--color-surface); cursor:pointer; font-size:10px; color:var(--color-text-tertiary); font-family:var(--font-family-body);">清除缓存</button>
       <button id="user-switch-btn" style="padding:4px 12px; border-radius:var(--radius-full); border:1px solid var(--color-border); background:var(--color-surface); cursor:pointer; font-size:var(--font-size-xs); color:var(--color-text-secondary); font-family:var(--font-family-body);">切换用户</button>
     </div>
   </div>
@@ -1042,6 +1043,16 @@ document.addEventListener('DOMContentLoaded', function() {
       logout();
       ensureLogin(function() { location.reload(); });
     }
+  });
+  document.getElementById('user-cache-btn').addEventListener('click', function() {
+    if (!confirm('清除本地缓存后，页面会重新从服务器加载最新数据。确定清除？')) return;
+    try {
+      var keys = ['won_prizes_' + (nick || ''), 'used_prizes_' + (nick || ''), 'unlocked_achievements_' + (nick || ''),
+        'sc_achievements_claimed_' + (nick || ''), 'checkin_calendar_data_' + (nick || ''),
+        'sc_prizes_used_' + (nick || ''), 'app_v3_migrated'];
+      keys.forEach(function(k) { try { localStorage.removeItem(k); } catch(e) {} });
+    } catch(e) {}
+    location.reload();
   });
 });
 </script>
