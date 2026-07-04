@@ -284,7 +284,7 @@
             height: var(--spacing-md);
         }
 
-        /* === Tab Bar === */
+        /* === Tab Bar (unified) === */
         .tab-bar {
             position: fixed;
             bottom: 0;
@@ -300,19 +300,27 @@
             display: flex;
             align-items: center;
             justify-content: space-around;
-            padding: var(--spacing-sm) 0;
+            padding: 8px 0;
         }
         .tab-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 2px;
-            padding: var(--spacing-sm) 12px;
+            padding: 8px 12px;
             font-size: 10px;
             font-weight: var(--font-weight-medium);
+            color: var(--color-text-tertiary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: color 0.2s;
+        }
+        .tab-item.active {
+            color: var(--color-primary);
         }
         .tab-item .tab-emoji {
             font-size: 1.25rem;
+            line-height: 1;
         }
 
         /* === Animations === */

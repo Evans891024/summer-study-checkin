@@ -269,24 +269,26 @@
     </div>
 
     <!-- Bottom Tab Bar -->
-    <div class="tab-bar">
-      <a href="#" class="tab-item" data-dom-id="nav-home">
-        <span class="tab-emoji">🏠</span>
-        <span>首页</span>
-      </a>
-      <a href="#" class="tab-item" data-dom-id="nav-daily-checkin">
-        <span class="tab-emoji">📋</span>
-        <span>打卡</span>
-      </a>
-      <a href="#" class="tab-item" data-dom-id="nav-treasure-box">
-        <span class="tab-emoji">🎁</span>
-        <span>宝箱</span>
-      </a>
-      <a href="#" class="tab-item active" data-dom-id="nav-my-rewards">
-        <span class="tab-emoji">🏆</span>
-        <span>奖励</span>
-      </a>
-    </div>
+    <nav class="tab-bar">
+      <div class="tab-bar-inner">
+        <a href="#" class="tab-item" data-dom-id="nav-home">
+          <span class="tab-emoji">🏠</span>
+          <span>首页</span>
+        </a>
+        <a href="#" class="tab-item" data-dom-id="nav-daily-checkin">
+          <span class="tab-emoji">📋</span>
+          <span>打卡</span>
+        </a>
+        <a href="#" class="tab-item" data-dom-id="nav-treasure-box">
+          <span class="tab-emoji">🎁</span>
+          <span>宝箱</span>
+        </a>
+        <a href="#" class="tab-item active" data-dom-id="nav-my-rewards">
+          <span class="tab-emoji">🏆</span>
+          <span>奖励</span>
+        </a>
+      </div>
+    </nav>
 
 
 <!-- User action bar -->
@@ -439,34 +441,35 @@
       animation: sparkle 2s ease-in-out infinite;
     }
 
-    /* Tab bar */
+    /* === Tab Bar (unified) === */
     .tab-bar {
       position: fixed;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 100%;
       max-width: 768px;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid var(--color-border-soft);
-      display: flex;
-      justify-content: space-around;
-      padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+      width: 100%;
       z-index: 50;
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-border);
     }
-
+    .tab-bar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 8px 0;
+    }
     .tab-item {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
-      font-size: 0.65rem;
+      padding: 8px 12px;
+      font-size: 10px;
+      font-weight: var(--font-weight-medium);
       color: var(--color-text-tertiary);
       text-decoration: none;
-      padding: 4px 12px;
-      border-radius: var(--radius-sm);
+      border-radius: 8px;
       transition: color 0.2s;
     }
     .tab-item.active {
@@ -475,10 +478,6 @@
     .tab-item .tab-emoji {
       font-size: 1.25rem;
       line-height: 1;
-    }
-    .tab-item.hidden {
-      visibility: hidden;
-      pointer-events: none;
     }
 
     /* Achievement Detail Modal */
