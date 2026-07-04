@@ -1027,8 +1027,10 @@ document.addEventListener('DOMContentLoaded', function() {
   var switchBtn = document.getElementById('switch-user-btn');
   if (switchBtn) {
     switchBtn.addEventListener('click', function() {
-      logout();
-      ensureLogin(function() { location.reload(); });
+      if (confirm('确定要切换用户吗？当前数据已自动保存。')) {
+        logout();
+        ensureLogin(function() { location.reload(); });
+      }
     });
   }
 });
