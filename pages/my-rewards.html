@@ -815,6 +815,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (serverUser && serverUser.won_prizes && won.length === 0) {
           won = typeof serverUser.won_prizes === 'string' ? JSON.parse(serverUser.won_prizes) : serverUser.won_prizes;
         }
+        // Load used state
+        var usedPrizes = {};
+        try { var up = localStorage.getItem(scopedKey('used_prizes')); if (up) usedPrizes = JSON.parse(up); } catch(e) {}
+        if (serverUser && serverUser.used_prizes && Object.keys(usedPrizes).length === 0) {
+          usedPrizes = typeof serverUser.used_prizes === 'string' ? JSON.parse(serverUser.used_prizes) : (serverUser.used_prizes || {});
+        }
         var grid = document.getElementById('prizes-grid');
         var section = document.getElementById('prizes-section');
         var countEl = document.getElementById('prize-count');
@@ -823,17 +829,51 @@ document.addEventListener('DOMContentLoaded', function() {
         if (section) section.style.display = 'block';
         if (countEl) countEl.textContent = won.length + '件';
         grid.innerHTML = '';
-        won.slice(-6).reverse().forEach(function(p) {
+        won.slice(-6).reverse().forEach(function(p, idx) {
           var boxClass = p.type === 'gold' ? 'prize-card-golden' : '';
           var borderColor = p.type === 'gold' ? '#FDE68A' : p.type === 'silver' ? '#BFDBFE' : '#FED7AA';
           var boxShadow = p.type === 'gold' ? '0 4px 16px rgba(251,191,36,0.15)' : 'var(--shadow-card)';
+          var prizeKey = 'won-' + p.date + '-' + p.name + '-' + idx;
+          var isUsed = !!usedPrizes[prizeKey];
           var card = document.createElement('div');
-          card.className = 'prize-card ' + boxClass;
-          card.setAttribute('data-prize-id', 'won-' + p.date + '-' + p.name);
-          card.style.cssText = 'background:var(--color-surface);border:1px solid ' + borderColor + ';border-radius:var(--radius-lg);padding:16px 12px;text-align:center;box-shadow:' + boxShadow + ';cursor:pointer;';
+          card.className = 'prize-card ' + boxClass + (isUsed ? ' used' : '');
+          card.setAttribute('data-prize-key', prizeKey);
+          card.style.cssText = 'background:var(--color-surface);border:1px solid ' + borderColor + ';border-radius:var(--radius-lg);padding:16px 12px;text-align:center;box-shadow:' + boxShadow + ';cursor:pointer;position:relative;overflow:hidden;';
           card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + p.emoji + '</div>'
             + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
-            + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>';
+            + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>'
+            + (isUsed ? '<div style="position:absolute;top:4px;right:4px;background:#34D399;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">已用</div>' : '');
+          card.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (card.classList.contains('used')) return;
+            if (card.classList.contains('confirming')) return;
+            card.classList.add('confirming');
+            var originalContent = card.innerHTML;
+            var emoji = p.emoji;
+            card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:4px;">' + emoji + '</div>'
+              + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 6px;color:var(--color-text);">确定使用 ' + p.name + '？</p>'
+              + '<div style="display:flex;gap:8px;justify-content:center;">'
+              + '<button class="btn-confirm" style="padding:4px 14px;border-radius:12px;border:none;background:#34D399;color:#fff;cursor:pointer;font-size:12px;font-family:inherit;">确定</button>'
+              + '<button class="btn-cancel" style="padding:4px 14px;border-radius:12px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;font-family:inherit;">取消</button>'
+              + '</div>';
+            card.querySelector('.btn-confirm').addEventListener('click', function(ev) {
+              ev.stopPropagation();
+              card.classList.remove('confirming');
+              card.classList.add('used');
+              usedPrizes[prizeKey] = true;
+              localStorage.setItem(scopedKey('used_prizes'), JSON.stringify(usedPrizes));
+              DB.updateUser({ used_prizes: usedPrizes });
+              card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + emoji + '</div>'
+                + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
+                + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>'
+                + '<div style="position:absolute;top:4px;right:4px;background:#34D399;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">已用</div>';
+            });
+            card.querySelector('.btn-cancel').addEventListener('click', function(ev) {
+              ev.stopPropagation();
+              card.classList.remove('confirming');
+              card.innerHTML = originalContent;
+            });
+          });
           grid.appendChild(card);
         });
       } catch(e) {}
@@ -1002,7 +1042,17 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function saveClaimedState(state) {
     localStorage.setItem(scopedKey('sc_achievements_claimed'), JSON.stringify(state));
-    try { DB.updateUser({ claimed_achievements: JSON.parse(localStorage.getItem(scopedKey('sc_achievements_claimed')) || '{}') }); } catch(e) {}
+    try {
+      var a = achievements[currentAchievementId];
+      var coinsToAdd = a ? a.coins : 0;
+      // First get current user to add coins
+      DB.getUser().then(function(user) {
+        if (user) {
+          var newTotal = (user.total_coins || 0) + coinsToAdd;
+          DB.updateUser({ total_coins: newTotal, claimed_achievements: state });
+        }
+      });
+    } catch(e) {}
   }
 
   var modal = document.getElementById('achievement-detail-modal');
@@ -1024,13 +1074,15 @@ document.addEventListener('DOMContentLoaded', function() {
     currentAchievementId = id;
     var claimed = getClaimedState();
     var isClaimed = !!claimed[id];
+    var unlocked = getUnlockedAchievements();
+    var isUnlocked = unlocked.indexOf(id) !== -1;
 
     modalIcon.textContent = a.icon;
     modalName.textContent = a.name;
     modalDesc.textContent = a.desc;
     modalRewardCoins.textContent = a.coins + ' \uD83D\uDCB0';
 
-    if (a.locked) {
+    if (!isUnlocked) {
       modalContent.classList.add('locked-modal');
       modalStatusLabel.textContent = '\uD83D\uDD12 未解锁';
       modalStatusLabel.className = 'modal-status-label locked';
@@ -1056,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         modalClaimBtn.disabled = false;
         modalClaimBtn.className = 'modal-claim-btn';
       }
-      modalDateLabel.textContent = '完成于 ' + a.date;
+      modalDateLabel.textContent = '完成！';
     }
 
     modal.style.display = 'flex';
