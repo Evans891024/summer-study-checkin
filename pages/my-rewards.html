@@ -585,6 +585,10 @@
       background: #DBEAFE;
       color: #2563EB;
     }
+    .modal-status-label.claimable {
+      background: linear-gradient(135deg, #FBBF24, #FB923C);
+      color: #fff;
+    }
     .modal-date-label {
       font-size: var(--font-size-xs);
       color: var(--color-text-tertiary);
@@ -899,8 +903,8 @@ document.addEventListener('DOMContentLoaded', function() {
         modalClaimBtn.disabled = true;
         modalClaimBtn.className = 'modal-claim-btn claimed-state';
       } else {
-        modalStatusLabel.textContent = '\u2705 已完成';
-        modalStatusLabel.className = 'modal-status-label earned';
+        modalStatusLabel.textContent = '可领取';
+        modalStatusLabel.className = 'modal-status-label claimable';
         modalClaimBtn.style.display = 'block';
         modalClaimBtn.textContent = '\uD83C\uDF81 领取奖励（+' + a.coins + '\uD83D\uDCB0）';
         modalClaimBtn.disabled = false;

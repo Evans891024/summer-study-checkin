@@ -490,7 +490,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (user) {
           // Update greeting with nickname
           var greetingEl = document.getElementById('greeting-text');
-          if (greetingEl) greetingEl.textContent = '早上好，' + nickname + '！';
+          if (greetingEl) {
+            var hour = new Date().getHours();
+            var greetWord = hour < 6 ? '夜深了' : hour < 12 ? '早上好' : hour < 14 ? '中午好' : hour < 18 ? '下午好' : '晚上好';
+            greetingEl.textContent = greetWord + '，' + nickname + '！';
+          }
           // Update total coins stat card
           if (user.total_coins !== undefined && user.total_coins !== null) {
             var totalCoinsCard = document.getElementById('stat-total-coins');

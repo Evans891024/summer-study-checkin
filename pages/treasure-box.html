@@ -638,10 +638,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Priority: localStorage > defaults
   var loaded = loadRewards();
-  if (loaded) {
-    rewards = loaded.rewards;
-    emojis = loaded.emojis;
-  }
+  var rewards = loaded ? loaded.rewards : JSON.parse(JSON.stringify(defaultRewards));
+  var emojis = loaded ? loaded.emojis : JSON.parse(JSON.stringify(defaultEmojis));
 
   // Initialize from Supabase (wrapped in ensureLogin)
   ensureLogin(function(nickname) {
@@ -684,8 +682,7 @@ document.addEventListener('DOMContentLoaded', function() {
     badges.forEach(function(b) {
       b.innerHTML = '余额: ' + coins + '枚 <span style="font-size:1.125rem;">&#x1F4B0;</span>';
     });
-    var priceTag = document.querySelector('[data-price-tag]');
-    if (priceTag) priceTag.textContent = '60枚/次 \u{1F4B0}';
+
   }
 
   function openBox(type, cost) {

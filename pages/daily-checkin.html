@@ -499,7 +499,7 @@
           </div>
         </div>
         <div class="task-badges">
-          <span class="badge-coins">+2枚 💰</span>
+          <span class="badge-coins">+3枚 💰</span>
         </div>
       </div>
 
@@ -513,7 +513,7 @@
           </div>
         </div>
         <div class="task-badges">
-          <span class="badge-coins">+3枚 💰</span>
+          <span class="badge-coins">+2枚 💰</span>
         </div>
       </div>
 
@@ -541,7 +541,7 @@
           </div>
         </div>
         <div class="task-badges">
-          <span class="badge-coins">+2枚 💰</span>
+          <span class="badge-coins">+3枚 💰</span>
         </div>
       </div>
 
@@ -1112,9 +1112,19 @@ document.addEventListener('DOMContentLoaded', function() {
     var data = getCheckinData();
     var key = getTodayKey();
     var currentCompleted = document.querySelectorAll('.task-card.completed').length;
-    data[key] = { completed: currentCompleted, total: totalTasks };
+    // Collect completed task indices
+    var completedIndices = [];
+    document.querySelectorAll('.task-card').forEach(function(tc, ti) {
+      if (tc.classList.contains('completed')) completedIndices.push(ti);
+    });
+    // Calculate coins from badge text
+    var totalCoins = 0;
+    document.querySelectorAll('.task-card.completed').forEach(function(card) {
+      var ct = card.querySelector('.badge-coins');
+      if (ct) totalCoins += parseInt(ct.textContent) || 0;
+    });
+    data[key] = { completed: currentCompleted, total: totalTasks, tasks: completedIndices, coins: totalCoins };
     saveCheckinData(data);
-    // Supabase save is handled in the task click handler above
     renderCalendar();
   }
 
