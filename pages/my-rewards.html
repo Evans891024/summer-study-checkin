@@ -742,13 +742,28 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.badge-circle[data-achievement-id]').forEach(function(circle) {
       var id = parseInt(circle.getAttribute('data-achievement-id'));
       var parentDiv = circle.closest('div');
-      var nameP = parentDiv ? parentDiv.querySelectorAll('p') : [];
       if (unlocked.indexOf(id) !== -1) {
         circle.classList.remove('locked');
         circle.classList.add('earned');
+        if (achievements[id]) {
+          circle.textContent = achievements[id].icon;
+        }
+        if (parentDiv) {
+          var ps = parentDiv.querySelectorAll('p');
+          if (ps[1]) ps[1].textContent = achievements[id] ? achievements[id].desc : '';
+        }
       } else {
         circle.classList.remove('earned');
         circle.classList.add('locked');
+        if (achievements[id] && achievements[id].icon === '\uD83D\uDD12') {
+          // keep lock icon
+        } else if (id > 6) {
+          circle.textContent = '\uD83D\uDD12';
+        }
+        if (parentDiv) {
+          var ps2 = parentDiv.querySelectorAll('p');
+          if (ps2[1]) ps2[1].textContent = '即将解锁';
+        }
       }
     });
   }
@@ -767,12 +782,16 @@ document.addEventListener('DOMContentLoaded', function() {
             var coinsEl = document.getElementById('stat-total-coins-rewards');
             if (coinsEl) { var v2 = coinsEl.querySelector('.stat-value'); if (v2) v2.textContent = (serverUser.total_coins || 0) + '枚'; }
             var claimed = typeof serverUser.claimed_achievements === 'string' ? JSON.parse(serverUser.claimed_achievements) : (serverUser.claimed_achievements || {});
-            var usedPrizes = typeof serverUser.used_prizes === 'string' ? JSON.parse(serverUser.used_prizes) : (serverUser.used_prizes || []);
-            // Count claimed achievements + used prizes as "collected rewards"
+            var wonPrizes = typeof serverUser.won_prizes === 'string' ? JSON.parse(serverUser.won_prizes) : (serverUser.won_prizes || []);
             var claimedCount = 0; for (var k in claimed) { if (claimed.hasOwnProperty(k)) claimedCount++; }
             var collEl = document.getElementById('stat-collected-rewards');
-            if (collEl) { var v3 = collEl.querySelector('.stat-value'); if (v3) v3.textContent = (claimedCount + usedPrizes.length) + '个'; }
+            if (collEl) { var v3 = collEl.querySelector('.stat-value'); if (v3) v3.textContent = (claimedCount + wonPrizes.length) + '个'; }
+            var boxOpens = serverUser.box_opens || 0;
+            var boxEl = document.getElementById('stat-box-opens');
+            if (boxEl) { var v4 = boxEl.querySelector('.stat-value'); if (v4) v4.textContent = boxOpens + '次'; }
           }
+          // Also read from localStorage as fallback
+          renderPrizes();
         });
       } catch(e) {}
     }
@@ -788,6 +807,38 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
 
+    function renderPrizes() {
+      try {
+        var wonStr = localStorage.getItem(scopedKey('won_prizes'));
+        var won = wonStr ? JSON.parse(wonStr) : [];
+        // Also try from serverUser
+        if (serverUser && serverUser.won_prizes && won.length === 0) {
+          won = typeof serverUser.won_prizes === 'string' ? JSON.parse(serverUser.won_prizes) : serverUser.won_prizes;
+        }
+        var grid = document.getElementById('prizes-grid');
+        var section = document.getElementById('prizes-section');
+        var countEl = document.getElementById('prize-count');
+        if (!grid) return;
+        if (won.length === 0) { if (section) section.style.display = 'none'; return; }
+        if (section) section.style.display = 'block';
+        if (countEl) countEl.textContent = won.length + '件';
+        grid.innerHTML = '';
+        won.slice(-6).reverse().forEach(function(p) {
+          var boxClass = p.type === 'gold' ? 'prize-card-golden' : '';
+          var borderColor = p.type === 'gold' ? '#FDE68A' : p.type === 'silver' ? '#BFDBFE' : '#FED7AA';
+          var boxShadow = p.type === 'gold' ? '0 4px 16px rgba(251,191,36,0.15)' : 'var(--shadow-card)';
+          var card = document.createElement('div');
+          card.className = 'prize-card ' + boxClass;
+          card.setAttribute('data-prize-id', 'won-' + p.date + '-' + p.name);
+          card.style.cssText = 'background:var(--color-surface);border:1px solid ' + borderColor + ';border-radius:var(--radius-lg);padding:16px 12px;text-align:center;box-shadow:' + boxShadow + ';cursor:pointer;';
+          card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + p.emoji + '</div>'
+            + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
+            + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>';
+          grid.appendChild(card);
+        });
+      } catch(e) {}
+    }
+
     try {
       DB.initUser().then(function(user) {
         if (user) {
@@ -799,9 +850,124 @@ document.addEventListener('DOMContentLoaded', function() {
               localStorage.setItem(scopedKey('sc_achievements_claimed'), JSON.stringify(ca));
             } catch(e) {}
           }
+          // Check achievements from real data
+          DB.getAllCheckins().then(function(checkins) {
+            if (checkins && checkins.length > 0) {
+              var unlocked = getUnlockedAchievements();
+              var taskIndicesByDate = {};
+              checkins.forEach(function(c) { taskIndicesByDate[c.date] = c.completed_tasks || []; });
+              var dates = Object.keys(taskIndicesByDate).sort();
+              // 1: 初来乍到 — first checkin
+              if (unlocked.indexOf(1) === -1) { unlocked.push(1); }
+              // 2: 连续3天 — check consecutive dates
+              if (unlocked.indexOf(2) === -1) {
+                var streak = 0;
+                var prevDate = null;
+                dates.forEach(function(d) {
+                  if (!prevDate) { streak = 1; prevDate = d; return; }
+                  var prev = new Date(prevDate), curr = new Date(d);
+                  var diff = Math.round((curr - prev) / 86400000);
+                  if (diff === 1) { streak++; } else { streak = 1; }
+                  prevDate = d;
+                });
+                if (streak >= 3) unlocked.push(2);
+              }
+              // 3: 阅读小达人 — count days with reading tasks (4 or 6)
+              if (unlocked.indexOf(3) === -1) {
+                var readingDays = 0;
+                checkins.forEach(function(c) {
+                  var tasks = c.completed_tasks || [];
+                  if (tasks.indexOf(4) !== -1 || tasks.indexOf(6) !== -1) readingDays++;
+                });
+                if (readingDays >= 7) unlocked.push(3);
+              }
+              // 4: 练字小能手 — count days with task 2 (练字)
+              if (unlocked.indexOf(4) === -1) {
+                var writingDays = 0;
+                checkins.forEach(function(c) {
+                  if ((c.completed_tasks || []).indexOf(2) !== -1) writingDays++;
+                });
+                if (writingDays >= 5) unlocked.push(4);
+              }
+              // 5: 学习小公主 — 3 days with all tasks
+              if (unlocked.indexOf(5) === -1) {
+                var fullDays = 0;
+                checkins.forEach(function(c) {
+                  if (c.completed_count === c.total_count && c.total_count >= 9) fullDays++;
+                });
+                if (fullDays >= 3) unlocked.push(5);
+              }
+              // 6: 满分达人 — 5 days with task 3 (口算)
+              if (unlocked.indexOf(6) === -1) {
+                var mathDays = 0;
+                checkins.forEach(function(c) {
+                  if ((c.completed_tasks || []).indexOf(3) !== -1) mathDays++;
+                });
+                if (mathDays >= 5) unlocked.push(6);
+              }
+              // 7: 连续7天
+              if (unlocked.indexOf(7) === -1) {
+                var streak7 = 0;
+                var prevDate7 = null;
+                dates.forEach(function(d) {
+                  if (!prevDate7) { streak7 = 1; prevDate7 = d; return; }
+                  var prev = new Date(prevDate7), curr = new Date(d);
+                  if (Math.round((curr - prev) / 86400000) === 1) streak7++; else streak7 = 1;
+                  prevDate7 = d;
+                });
+                if (streak7 >= 7) unlocked.push(7);
+              }
+              // 8: 超级学霸 — 10 days with all tasks
+              if (unlocked.indexOf(8) === -1) {
+                var fullDays10 = 0;
+                checkins.forEach(function(c) {
+                  if (c.completed_count === c.total_count && c.total_count >= 9) fullDays10++;
+                });
+                if (fullDays10 >= 10) unlocked.push(8);
+              }
+              // 11: 字帖达人 — 15 days with task 2
+              if (unlocked.indexOf(11) === -1) {
+                var writingDays15 = 0;
+                checkins.forEach(function(c) {
+                  if ((c.completed_tasks || []).indexOf(2) !== -1) writingDays15++;
+                });
+                if (writingDays15 >= 15) unlocked.push(11);
+              }
+              // 12: 计算高手 — 20 days with task 3
+              if (unlocked.indexOf(12) === -1) {
+                var mathDays20 = 0;
+                checkins.forEach(function(c) {
+                  if ((c.completed_tasks || []).indexOf(3) !== -1) mathDays20++;
+                });
+                if (mathDays20 >= 20) unlocked.push(12);
+              }
+              // 13: 作文能手 — 15 days with task 7
+              if (unlocked.indexOf(13) === -1) {
+                var essayDays15 = 0;
+                checkins.forEach(function(c) {
+                  if ((c.completed_tasks || []).indexOf(7) !== -1) essayDays15++;
+                });
+                if (essayDays15 >= 15) unlocked.push(13);
+              }
+              // 14: 宝箱猎人 — box_opens >= 30
+              if (unlocked.indexOf(14) === -1) {
+                if ((user.box_opens || 0) >= 30) unlocked.push(14);
+              }
+              // 15: 暑期勇士 — 30 days
+              if (unlocked.indexOf(15) === -1) {
+                if (dates.length >= 30) unlocked.push(15);
+              }
+              // 9: 暑期冠军 — entire summer (just use 60 days)
+              if (unlocked.indexOf(9) === -1) {
+                if (dates.length >= 60) unlocked.push(9);
+              }
+              // 10: 早鸟之星 — can't check time from data, skip
+              saveUnlockedAchievements(unlocked);
+            }
+            applyAchievementUnlockStates();
+          });
           // Re-apply UI states
           applyAchievementStates();
-          applyAchievementUnlockStates();
           updateStats();
         }
       }).catch(function(e) { console.warn('Supabase init failed:', e); });
@@ -810,12 +976,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ========== Achievement Badges ==========
   var achievements = {
-    1: { name: '初来乍到', icon: '\uD83D\uDD12', desc: '完成你的第一次每日打卡，迈出学习的第一步！每一段旅程都始于第一步。', coins: 5, locked: true },
-    2: { name: '连续3天', icon: '\uD83D\uDD12', desc: '连续3天完成每日打卡任务，坚持不懈就是胜利！好习惯正在养成中。', coins: 10, locked: true },
-    3: { name: '阅读小达人', icon: '\uD83D\uDD12', desc: '累计阅读7天，书籍是通往世界的窗户。你已经打开了这扇窗！', coins: 15, locked: true },
-    4: { name: '练字小能手', icon: '\uD83D\uDD12', desc: '坚持练字5天，一笔一划都是进步。你的字越来越漂亮了！', coins: 10, locked: true },
-    5: { name: '学习小公主', icon: '\uD83D\uDD12', desc: '连续3天完成全部学习任务，你是当之无愧的学习小公主！', coins: 20, locked: true },
-    6: { name: '满分达人', icon: '\uD83D\uDD12', desc: '口算全对5次，又快又准！你的计算能力越来越强了！', coins: 15, locked: true },
+    1: { name: '初来乍到', icon: '\u2B50', desc: '完成你的第一次每日打卡，迈出学习的第一步！每一段旅程都始于第一步。', coins: 5, locked: true },
+    2: { name: '连续3天', icon: '\uD83D\uDD25', desc: '连续3天完成每日打卡任务，坚持不懈就是胜利！好习惯正在养成中。', coins: 10, locked: true },
+    3: { name: '阅读小达人', icon: '\uD83D\uDCDA', desc: '累计阅读7天，书籍是通往世界的窗户。你已经打开了这扇窗！', coins: 15, locked: true },
+    4: { name: '练字小能手', icon: '\u270D\uFE0F', desc: '坚持练字5天，一笔一划都是进步。你的字越来越漂亮了！', coins: 10, locked: true },
+    5: { name: '学习小公主', icon: '\uD83D\uDC51', desc: '连续3天完成全部学习任务，你是当之无愧的学习小公主！', coins: 20, locked: true },
+    6: { name: '满分达人', icon: '\uD83C\uDFAF', desc: '口算全对5次，又快又准！你的计算能力越来越强了！', coins: 15, locked: true },
     7: { name: '连续7天', icon: '\uD83D\uDD12', desc: '连续打卡7天，一周的坚持！毅力是最好的品质。', coins: 30, locked: true },
     8: { name: '超级学霸', icon: '\uD83D\uDD12', desc: '完成全部任务累计10天，全能学霸非你莫属！', coins: 50, locked: true },
     9: { name: '暑期冠军', icon: '\uD83D\uDD12', desc: '坚持打卡整个暑期，你是真正的冠军！', coins: 100, locked: true },

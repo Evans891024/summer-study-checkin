@@ -735,6 +735,18 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('modal-reward').textContent = reward;
       document.getElementById('modal-coin-change').textContent = '-' + cost + '枚 金币';
       document.getElementById('treasure-modal').style.display = 'flex';
+
+      // Save this won prize
+      try {
+        var won = JSON.parse(localStorage.getItem(sKey('won_prizes')) || '[]');
+        won.push({ name: reward, emoji: emoji, type: type, date: new Date().toISOString().split('T')[0] });
+        localStorage.setItem(sKey('won_prizes'), JSON.stringify(won));
+        // Track box opens count
+        var opens = parseInt(localStorage.getItem(sKey('box_opens')) || '0') + 1;
+        localStorage.setItem(sKey('box_opens'), opens.toString());
+        // Sync to Supabase
+        DB.updateUser({ won_prizes: won, box_opens: opens });
+      } catch(e) {}
     }, 2500);
   }
 
@@ -826,6 +838,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modal-reward').textContent = coinReward + '枚金币';
         document.getElementById('modal-coin-change').textContent = '余额 +' + coinReward;
         document.getElementById('treasure-modal').style.display = 'flex';
+        // Track daily box opens
+        try {
+          var opens = parseInt(localStorage.getItem(sKey('box_opens')) || '0') + 1;
+          localStorage.setItem(sKey('box_opens'), opens.toString());
+          DB.updateUser({ box_opens: opens });
+        } catch(e) {}
         // Mark today as used
         try {
           localStorage.setItem(sKey('daily_free_date'), new Date().toISOString().split('T')[0]);
