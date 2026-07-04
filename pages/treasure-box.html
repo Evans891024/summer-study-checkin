@@ -148,7 +148,7 @@
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
               <span style="font-weight: var(--font-weight-title); font-size: var(--font-size-body); font-family: var(--font-family-title); color: #92400E;">铜宝箱</span>
-              <span style="border-radius: var(--radius-full); padding: 2px 12px; font-size: var(--font-size-xs); font-weight: var(--font-weight-title); background: #FED7AA; color: #92400E;">5枚/次</span>
+              <span style="border-radius: var(--radius-full); padding: 2px 12px; font-size: var(--font-size-xs); font-weight: var(--font-weight-title); background: #FED7AA; color: #92400E;">30枚/次</span>
             </div>
             <p style="font-size: var(--font-size-xs); margin: 0; color: var(--color-text-secondary);">可能获得: 贴纸、铅笔</p>
           </div>
@@ -165,7 +165,7 @@
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
               <span style="font-weight: var(--font-weight-title); font-size: var(--font-size-body); font-family: var(--font-family-title); color: #1E40AF;">银宝箱</span>
-              <span style="border-radius: var(--radius-full); padding: 2px 12px; font-size: var(--font-size-xs); font-weight: var(--font-weight-title); background: #BFDBFE; color: #1E40AF;">10枚/次</span>
+              <span style="border-radius: var(--radius-full); padding: 2px 12px; font-size: var(--font-size-xs); font-weight: var(--font-weight-title); background: #BFDBFE; color: #1E40AF;">60枚/次</span>
             </div>
             <p style="font-size: var(--font-size-xs); margin: 0; color: var(--color-text-secondary);">可能获得: 手账本、彩色笔</p>
           </div>
@@ -182,7 +182,7 @@
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
               <span style="font-weight: var(--font-weight-title); font-size: var(--font-size-body); font-family: var(--font-family-title); color: #92400E;">金宝箱</span>
-              <span style="border-radius: var(--radius-full); padding: 2px 12px; font-size: var(--font-size-xs); font-weight: var(--font-weight-title); background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #78350F;">20枚/次</span>
+              <span style="border-radius: var(--radius-full); padding: 2px 12px; font-size: var(--font-size-xs); font-weight: var(--font-weight-title); background: linear-gradient(135deg, #FBBF24, #F59E0B); color: #78350F;">100枚/次</span>
             </div>
             <p style="font-size: var(--font-size-xs); margin: 0; color: var(--color-text-secondary);">可能获得: 公主皇冠、绘本</p>
           </div>
@@ -685,7 +685,7 @@ document.addEventListener('DOMContentLoaded', function() {
       b.innerHTML = '余额: ' + coins + '枚 <span style="font-size:1.125rem;">&#x1F4B0;</span>';
     });
     var priceTag = document.querySelector('[data-price-tag]');
-    if (priceTag) priceTag.textContent = '10枚/次 \u{1F4B0}';
+    if (priceTag) priceTag.textContent = '60枚/次 \u{1F4B0}';
   }
 
   function openBox(type, cost) {
@@ -856,11 +856,11 @@ document.addEventListener('DOMContentLoaded', function() {
       var card = btn.closest('div[class]') || btn.parentElement;
       var priceText = card ? card.textContent : '';
       if (priceText.indexOf('铜') !== -1) {
-        btn.addEventListener('click', function(e) { e.preventDefault(); openBox('bronze', 5); });
+        btn.addEventListener('click', function(e) { e.preventDefault(); openBox('bronze', 30); });
       } else if (priceText.indexOf('银') !== -1) {
-        btn.addEventListener('click', function(e) { e.preventDefault(); openBox('silver', 10); });
+        btn.addEventListener('click', function(e) { e.preventDefault(); openBox('silver', 60); });
       } else if (priceText.indexOf('金') !== -1) {
-        btn.addEventListener('click', function(e) { e.preventDefault(); openBox('gold', 20); });
+        btn.addEventListener('click', function(e) { e.preventDefault(); openBox('gold', 100); });
       }
     }
   });
