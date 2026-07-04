@@ -700,10 +700,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   var coinCount = 0;
+  var todayCoins = 0; // Coins earned today only
   var completedCount = 0;
   var totalTasks = 9;
   var allCheckinData = {};
-  var serverLockedTasks = {}; // Tasks locked from server — cannot be un-checked today
 
   function getTodayKey() {
     var d = new Date();
@@ -725,14 +725,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (checkin && checkin.completed_tasks) {
           // Restore task completion states from Supabase
           completedCount = checkin.completed_count || 0;
-          coinCount = checkin.coins_earned || 0;
+          todayCoins = checkin.coins_earned || 0;
           var cards = document.querySelectorAll('.task-card');
           cards.forEach(function(card, i) {
             if (checkin.completed_tasks.indexOf(i) !== -1) {
-              serverLockedTasks[i] = true; // Lock this task
               card.classList.remove('pending');
               card.classList.add('completed');
-              card.setAttribute('data-locked', 'true');
               var circle = card.querySelector('.check-circle');
               circle.style.border = 'none';
               circle.style.background = 'linear-gradient(135deg, #F472B6, #FB923C)';
@@ -752,9 +750,7 @@ document.addEventListener('DOMContentLoaded', function() {
           var progressFill = document.querySelector('.progress-bar-fill');
           if (progressFill) progressFill.style.width = (completedCount / totalTasks * 100) + '%';
           var coinsText = document.querySelector('.summary-coins-text');
-          if (coinsText) coinsText.textContent = '已获得 ' + coinCount + '枚 金币!';
-          var headerCoin = document.querySelector('.header-coin-badge');
-          if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
+          if (coinsText) coinsText.textContent = '已获得 ' + todayCoins + '枚 金币!';
         }
         // Load all checkin data for calendar
         return DB.getAllCheckins();
@@ -775,16 +771,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Make task cards clickable for toggle effect
+  // Make task cards clickable — once completed, cannot be undone
   document.querySelectorAll('.task-card').forEach(function(card, index) {
     card.addEventListener('click', function(e) {
       if (e.target.closest('[data-dom-id]')) return;
 
-      var isCompleted = card.classList.contains('completed');
-      var isLocked = card.getAttribute('data-locked') === 'true';
-
-      // If task is already completed (locked), do NOT allow un-checking
-      if (isCompleted && isLocked) return;
+      // If already completed, do nothing — once checked, it's locked for the day
+      if (card.classList.contains('completed')) return;
 
       var circle = card.querySelector('.check-circle');
       var badges = card.querySelector('.task-badges');
@@ -794,48 +787,24 @@ document.addEventListener('DOMContentLoaded', function() {
         if (coinText) coinReward = parseInt(coinText.textContent) || 0;
       }
 
-      if (isCompleted) {
-        // Un-complete: completed -> pending (only for tasks completed in this session, not yet locked)
-        card.classList.remove('completed', 'just-completed');
-        card.classList.add('pending');
-        circle.innerHTML = '';
-        circle.style.border = '2px solid var(--color-text-tertiary)';
-        circle.style.background = 'transparent';
-        if (badges) {
-          var completedBadge = badges.querySelector('.badge-completed');
-          if (completedBadge) completedBadge.remove();
-          var existingCoins = badges.querySelectorAll('.badge-coins');
-          existingCoins.forEach(function(c) { c.remove(); });
-          var coinSpan = document.createElement('span');
-          coinSpan.className = 'badge-coins';
-          coinSpan.textContent = '+' + (coinReward || 2) + '枚 💰';
-          badges.appendChild(coinSpan);
-        }
-        completedCount--;
-        coinCount -= (coinReward || 2);
-        delete serverLockedTasks[index];
-      } else {
-        // Complete: pending -> completed — immediately lock it
-        card.classList.remove('pending');
-        card.classList.add('completed', 'just-completed');
-        card.setAttribute('data-locked', 'true');
-        serverLockedTasks[index] = true;
-        circle.style.border = 'none';
-        circle.style.background = 'linear-gradient(135deg, #F472B6, #FB923C)';
-        circle.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-        // Remove animation class after it finishes
-        setTimeout(function() { card.classList.remove('just-completed'); }, 500);
-        if (badges) {
-          var coinSpan2 = badges.querySelector('.badge-coins');
-          if (coinSpan2) coinSpan2.remove();
-          var doneSpan = document.createElement('span');
-          doneSpan.className = 'badge-completed';
-          doneSpan.textContent = '已完成';
-          badges.appendChild(doneSpan);
-        }
-        completedCount++;
-        coinCount += (coinReward || 2);
+      // Complete: pending -> completed (one-way, cannot undo)
+      card.classList.remove('pending');
+      card.classList.add('completed', 'just-completed');
+      circle.style.border = 'none';
+      circle.style.background = 'linear-gradient(135deg, #F472B6, #FB923C)';
+      circle.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      setTimeout(function() { card.classList.remove('just-completed'); }, 500);
+      if (badges) {
+        var coinSpan2 = badges.querySelector('.badge-coins');
+        if (coinSpan2) coinSpan2.remove();
+        var doneSpan = document.createElement('span');
+        doneSpan.className = 'badge-completed';
+        doneSpan.textContent = '已完成';
+        badges.appendChild(doneSpan);
       }
+      completedCount++;
+      todayCoins += (coinReward || 2);
+      coinCount += (coinReward || 2);
 
       // Update summary
       var summaryTitle = document.querySelector('.summary-title');
@@ -843,22 +812,19 @@ document.addEventListener('DOMContentLoaded', function() {
       var progressFill = document.querySelector('.progress-bar-fill');
       if (progressFill) progressFill.style.width = (completedCount / totalTasks * 100) + '%';
       var coinsText = document.querySelector('.summary-coins-text');
-      if (coinsText) coinsText.textContent = '已获得 ' + coinCount + '枚 金币!';
-      // Update header coin badge
+      if (coinsText) coinsText.textContent = '已获得 ' + todayCoins + '枚 金币!';
       var headerCoin = document.querySelector('.header-coin-badge');
       if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
       saveTodayCheckin();
 
-      // Save to Supabase (fire-and-forget)
+      // Save to Supabase
       try {
         var todayKey = getTodayKey();
         var completedIndices = [];
-        document.querySelectorAll('.task-card.completed').forEach(function(c) {
-          document.querySelectorAll('.task-card').forEach(function(tc, ti) {
-            if (tc === c) completedIndices.push(ti);
-          });
+        document.querySelectorAll('.task-card').forEach(function(tc, ti) {
+          if (tc.classList.contains('completed')) completedIndices.push(ti);
         });
-        DB.saveCheckin(todayKey, completedIndices, completedCount, totalTasks, coinCount);
+        DB.saveCheckin(todayKey, completedIndices, completedCount, totalTasks, todayCoins);
         DB.updateUser({ total_coins: coinCount });
       } catch(e) {
         console.warn('Supabase save error:', e);
