@@ -130,7 +130,7 @@
         </button>
       </div>
 
-      <p id="daily-free-hint" style="font-size: var(--font-size-small); margin-top: 8px; color: var(--color-text-secondary); font-family: var(--font-family-body);">每天可以免费开一次，别忘记哦！</p>
+      <p id="daily-free-hint" style="font-size: var(--font-size-small); margin-top: 8px; color: var(--color-text-secondary); font-family: var(--font-family-body);">每天免费抽一次，随机获得1~10枚金币！</p>
     </section>
 
     <!-- ===== Reward Tiers Section ===== -->
@@ -745,13 +745,26 @@ document.addEventListener('DOMContentLoaded', function() {
     dailyFreeBtn.addEventListener('click', function(e) {
       e.preventDefault();
       if (!checkDailyFree()) return;
-      // Use a special pool that combines all tiers
-      var allRewards = rewards.bronze.concat(rewards.silver).concat(rewards.gold);
-      var allEmojis = emojis.bronze.concat(emojis.silver).concat(emojis.gold);
-      if (allRewards.length === 0) return;
-      var idx = Math.floor(Math.random() * allRewards.length);
-      var reward = allRewards[idx];
-      var emoji = allEmojis[idx];
+      // Weighted random coin reward (1-10 coins, higher = rarer)
+      var coinPool = [
+        { coins: 1,  weight: 40 },
+        { coins: 2,  weight: 25 },
+        { coins: 3,  weight: 15 },
+        { coins: 5,  weight: 10 },
+        { coins: 8,  weight: 7 },
+        { coins: 10, weight: 3 }
+      ];
+      var totalWeight = 0;
+      coinPool.forEach(function(c) { totalWeight += c.weight; });
+      var rand = Math.random() * totalWeight;
+      var chosen = coinPool[0];
+      for (var i = 0; i < coinPool.length; i++) {
+        rand -= coinPool[i].weight;
+        if (rand <= 0) { chosen = coinPool[i]; break; }
+      }
+      var coinReward = chosen.coins;
+      coins += coinReward;
+      updateCoinDisplay();
 
       var overlay = document.getElementById('opening-overlay');
       var chest = document.getElementById('opening-chest');
@@ -781,16 +794,18 @@ document.addEventListener('DOMContentLoaded', function() {
       setTimeout(function() {
         clearInterval(particleInterval);
         chest.classList.add('hidden');
-        reveal.innerHTML = emoji;
+        var coinEmoji = coinReward >= 8 ? '\uD83D\uDC51' : coinReward >= 5 ? '\u{1F31F}' : '\u{1F4B0}';
+        reveal.innerHTML = coinEmoji;
         reveal.className = 'opening-reveal active';
       }, 1500);
 
       setTimeout(function() {
         overlay.classList.remove('active');
-        document.getElementById('modal-animation').textContent = emoji;
+        var coinEmoji2 = coinReward >= 8 ? '\uD83D\uDC51' : coinReward >= 5 ? '\u{1F31F}' : '\u{1F4B0}';
+        document.getElementById('modal-animation').textContent = coinEmoji2;
         document.getElementById('modal-title').textContent = '免费宝箱!';
-        document.getElementById('modal-reward').textContent = reward;
-        document.getElementById('modal-coin-change').textContent = '免费获得';
+        document.getElementById('modal-reward').textContent = coinReward + '枚金币';
+        document.getElementById('modal-coin-change').textContent = '余额 +' + coinReward;
         document.getElementById('treasure-modal').style.display = 'flex';
         // Mark today as used
         try {
