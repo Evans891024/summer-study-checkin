@@ -467,6 +467,17 @@
             <div style="height: env(safe-area-inset-bottom, 0px);"></div>
         </nav>
         <button id="switch-user-btn" style="position:fixed;bottom:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:var(--gradient-rainbow);color:#fff;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:100;display:flex;align-items:center;justify-content:center;" title="切换用户">&#x1F464;</button>
+<!-- User action bar -->
+<div id="user-action-bar" style="display:none; position:fixed; bottom:56px; left:50%; transform:translateX(-50%); width:100%; max-width:768px; z-index:100; background:rgba(255,255,255,0.96); border-top:1px solid var(--color-border); backdrop-filter:blur(8px);">
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 16px;">
+    <span style="font-size:var(--font-size-xs); color:var(--color-text-secondary);">
+      <span id="user-nickname-label" style="color:var(--color-primary); font-family:var(--font-family-title); font-weight:var(--font-weight-title);">然然</span> 已登录
+    </span>
+    <div style="display:flex; gap:6px;">
+      <button id="user-switch-btn" style="padding:4px 12px; border-radius:var(--radius-full); border:1px solid var(--color-border); background:var(--color-surface); cursor:pointer; font-size:var(--font-size-xs); color:var(--color-text-secondary); font-family:var(--font-family-body);">切换用户</button>
+    </div>
+  </div>
+</div>
     </div>
 
 <script>
@@ -561,16 +572,17 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch(e) { console.warn('Supabase init failed:', e); }
   });
 
-  // Switch user button
-  var switchBtn = document.getElementById('switch-user-btn');
-  if (switchBtn) {
-    switchBtn.addEventListener('click', function() {
-      if (confirm('确定要切换用户吗？当前数据已自动保存。')) {
-        logout();
-        ensureLogin(function() { location.reload(); });
-      }
-    });
-  }
+  // User action bar
+  var nickLabel = document.getElementById('user-nickname-label');
+  if (nickLabel) nickLabel.textContent = getNickname();
+  var userBar = document.getElementById('user-action-bar');
+  if (userBar) userBar.style.display = 'block';
+  document.getElementById('user-switch-btn').addEventListener('click', function() {
+    if (confirm('确定要切换用户吗？当前数据已自动保存。')) {
+      logout();
+      ensureLogin(function() { location.reload(); });
+    }
+  });
 });
 </script>
 </body>

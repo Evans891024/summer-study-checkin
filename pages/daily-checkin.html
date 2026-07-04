@@ -654,7 +654,18 @@
       </a>
     </div>
   </nav>
-<button id="switch-user-btn" style="position:fixed;bottom:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:var(--gradient-rainbow);color:#fff;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:100;display:flex;align-items:center;justify-content:center;" title="切换用户">&#x1F464;</button>
+<!-- User action bar -->
+<div id="user-action-bar" style="display:none; position:fixed; bottom:56px; left:50%; transform:translateX(-50%); width:100%; max-width:768px; z-index:100; background:rgba(255,255,255,0.96); border-top:1px solid var(--color-border); backdrop-filter:blur(8px);">
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 16px;">
+    <span style="font-size:var(--font-size-xs); color:var(--color-text-secondary);">
+      <span id="user-nickname-label" style="color:var(--color-primary); font-family:var(--font-family-title); font-weight:var(--font-weight-title);">然然</span> 已登录
+    </span>
+    <div style="display:flex; gap:6px;">
+      <button id="user-switch-btn" style="padding:4px 12px; border-radius:var(--radius-full); border:1px solid var(--color-border); background:var(--color-surface); cursor:pointer; font-size:var(--font-size-xs); color:var(--color-text-secondary); font-family:var(--font-family-body);">切换用户</button>
+      <button id="user-reset-btn" style="padding:4px 12px; border-radius:var(--radius-full); border:1px solid #FCA5A5; background:#FEF2F2; cursor:pointer; font-size:var(--font-size-xs); color:var(--state-error); font-family:var(--font-family-body);">重置今日打卡</button>
+    </div>
+  </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1127,16 +1138,64 @@ document.addEventListener('DOMContentLoaded', function() {
     renderCalendar();
   }
 
-  // Switch user button
-  var switchBtn = document.getElementById('switch-user-btn');
-  if (switchBtn) {
-    switchBtn.addEventListener('click', function() {
-      if (confirm('确定要切换用户吗？当前数据已自动保存。')) {
-        logout();
-        ensureLogin(function() { location.reload(); });
+  // ===== User action bar =====
+  function initUserBar() {
+    var bar = document.getElementById('user-action-bar');
+    if (!bar) return;
+    var nickLabel = document.getElementById('user-nickname-label');
+    if (nickLabel) nickLabel.textContent = nick;
+    bar.style.display = 'block';
+  }
+
+  document.getElementById('user-switch-btn').addEventListener('click', function() {
+    if (confirm('确定要切换用户吗？当前数据已自动保存。')) {
+      logout();
+      ensureLogin(function() { location.reload(); });
+    }
+  });
+
+  document.getElementById('user-reset-btn').addEventListener('click', function() {
+    if (!confirm('确定要重置今日打卡吗？今天已打卡的项目将全部恢复为未完成。')) return;
+    // Reset task cards to pending
+    document.querySelectorAll('.task-card.completed').forEach(function(card) {
+      card.classList.remove('completed', 'just-completed');
+      card.classList.add('pending');
+      var circle = card.querySelector('.check-circle');
+      circle.innerHTML = '';
+      circle.style.border = '2px solid var(--color-text-tertiary)';
+      circle.style.background = 'transparent';
+      var badges = card.querySelector('.task-badges');
+      var doneBadge = badges.querySelector('.badge-completed');
+      if (doneBadge) doneBadge.remove();
+      if (!badges.querySelector('.badge-coins')) {
+        var coinSpan = document.createElement('span');
+        coinSpan.className = 'badge-coins';
+        var coins = parseInt(card.getAttribute('data-coins')) || 2;
+        coinSpan.textContent = '+' + coins + '枚 💰';
+        badges.appendChild(coinSpan);
       }
     });
-  }
+    completedCount = 0;
+    todayCoins = 0;
+    var summaryTitle = document.querySelector('.summary-title');
+    if (summaryTitle) summaryTitle.textContent = '今日进度: 0/' + totalTasks + ' 已完成';
+    var progressFill = document.querySelector('.progress-bar-fill');
+    if (progressFill) progressFill.style.width = '0%';
+    var coinsText = document.querySelector('.summary-coins-text');
+    if (coinsText) coinsText.textContent = '已获得 0枚 金币!';
+    // Clear today from localStorage + Supabase
+    var todayKey = getTodayKey();
+    var data = getCheckinData();
+    delete data[todayKey];
+    saveCheckinData(data);
+    renderCalendar();
+    try { DB.saveCheckin(todayKey, [], 0, totalTasks, 0); DB.updateUser({ total_coins: coinCount - todayCoins }); coinCount -= todayCoins; } catch(e) {}
+    var headerCoin = document.querySelector('.header-coin-badge');
+    if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
+  });
+
+  // Init user bar after login
+  initUserBar();
 });
 </script>
 
