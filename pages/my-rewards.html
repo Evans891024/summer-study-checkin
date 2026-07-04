@@ -919,7 +919,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             var dates = Object.keys(taskIndicesByDate).sort();
               // 1: 初来乍到 — first checkin
-              if (unlocked.indexOf(1) === -1) { unlocked.push(1); }
+              if (unlocked.indexOf(1) === -1 && dates.length > 0) { unlocked.push(1); }
               // 2: 连续3天 — check consecutive dates
               if (unlocked.indexOf(2) === -1) {
                 var streak = 0;
