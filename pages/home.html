@@ -442,31 +442,25 @@
         <!-- Bottom Tab Bar -->
         <nav class="tab-bar">
             <div class="tab-bar-inner">
-                <!-- Home (active) -->
-                <a data-dom-id="nav-home" href="#" class="tab-item" style="color: var(--color-primary);">
+                <a data-dom-id="nav-home" href="#" class="tab-item active">
                     <span class="tab-emoji">🏠</span>
                     <span>首页</span>
                 </a>
-                <!-- Daily Check-in -->
-                <a data-dom-id="nav-daily-checkin" href="#" class="tab-item" style="color: var(--color-text-tertiary);">
+                <a data-dom-id="nav-daily-checkin" href="#" class="tab-item">
                     <span class="tab-emoji">📋</span>
                     <span>打卡</span>
                 </a>
-                <!-- Treasure Box -->
-                <a data-dom-id="nav-treasure-box" href="#" class="tab-item" style="color: var(--color-text-tertiary);">
+                <a data-dom-id="nav-treasure-box" href="#" class="tab-item">
                     <span class="tab-emoji">🎁</span>
                     <span>宝箱</span>
                 </a>
-                <!-- Rewards -->
-                <a data-dom-id="nav-my-rewards" href="#" class="tab-item" style="color: var(--color-text-tertiary);">
+                <a data-dom-id="nav-my-rewards" href="#" class="tab-item">
                     <span class="tab-emoji">🏆</span>
                     <span>奖励</span>
                 </a>
             </div>
-            <!-- Safe area for iPhone notch -->
-            <div style="height: env(safe-area-inset-bottom, 0px);"></div>
         </nav>
-        <button id="switch-user-btn" style="position:fixed;bottom:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:var(--gradient-rainbow);color:#fff;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:100;display:flex;align-items:center;justify-content:center;" title="切换用户">&#x1F464;</button>
+
 <!-- User action bar -->
 <div id="user-action-bar" style="display:none; position:fixed; bottom:56px; left:50%; transform:translateX(-50%); width:100%; max-width:768px; z-index:100; background:rgba(255,255,255,0.96); border-top:1px solid var(--color-border); backdrop-filter:blur(8px);">
   <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 16px;">
