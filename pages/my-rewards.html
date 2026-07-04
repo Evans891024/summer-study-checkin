@@ -910,9 +910,9 @@ document.addEventListener('DOMContentLoaded', function() {
               localStorage.setItem(scopedKey('sc_achievements_claimed'), JSON.stringify(ca));
             } catch(e) {}
           }
-          // Check achievements from real data
+          // Check achievements from real data — rebuild from scratch
           DB.getAllCheckins().then(function(checkins) {
-            var unlocked = getUnlockedAchievements();
+            var unlocked = [];
             var taskIndicesByDate = {};
             if (checkins && checkins.length > 0) {
               checkins.forEach(function(c) { taskIndicesByDate[c.date] = c.completed_tasks || []; });
