@@ -148,15 +148,18 @@ var DB = {
     });
   },
 
-  // ===== 打卡数据 =====
+  // 获取单日打卡数据
   getCheckin: function(date) {
     if (!DB.nickname) return Promise.resolve(null);
-    return sbFetch('checkins', 'GET', null, {
-      'user_code': 'eq.' + DB.nickname,
-      'date': 'eq.' + date,
-      'select': '*'
-    }).then(function(data) {
-      return data && data.length > 0 ? data[0] : null;
+    return DB.getUser().then(function(user) {
+      if (!user) return null;
+      return sbFetch('checkins', 'GET', null, {
+        'user_code': 'eq.' + user.user_code,
+        'date': 'eq.' + date,
+        'select': '*'
+      }).then(function(data) {
+        return data && data.length > 0 ? data[0] : null;
+      });
     });
   },
 
