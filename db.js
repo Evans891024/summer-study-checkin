@@ -224,6 +224,35 @@ var DB = {
     });
   },
 
+  // 统一统计助手函数
+  getUserStats: function() {
+    return DB.getAllCheckins().then(function(checkins) {
+      var totalDays = checkins.length;
+      var totalCoins = checkins.reduce(function(sum, c) { return sum + (c.coins_earned || 0); }, 0);
+      return { totalDays: totalDays, totalCoins: totalCoins };
+    });
+  },
+
+  // 通过 custom_rewards._stats 读写统计数据（避免不存在的列）
+  getStats: function() {
+    if (!DB.nickname) return Promise.resolve({ won_prizes: [], box_opens: 0, total_earned_coins: 0 });
+    return DB.getUser().then(function(user) {
+      if (!user || !user.custom_rewards) return { won_prizes: [], box_opens: 0, total_earned_coins: 0 };
+      var cr = typeof user.custom_rewards === 'string' ? JSON.parse(user.custom_rewards) : user.custom_rewards;
+      return cr._stats || { won_prizes: [], box_opens: 0, total_earned_coins: 0 };
+    });
+  },
+  addStats: function(updates) {
+    if (!DB.nickname) return Promise.resolve(false);
+    return DB.getUser().then(function(user) {
+      if (!user) return false;
+      var cr = user.custom_rewards ? (typeof user.custom_rewards === 'string' ? JSON.parse(user.custom_rewards) : user.custom_rewards) : {};
+      if (!cr._stats) cr._stats = { won_prizes: [], box_opens: 0, total_earned_coins: 0 };
+      for (var k in updates) { if (updates.hasOwnProperty(k)) cr._stats[k] = updates[k]; }
+      return sbFetch('users', 'PATCH', { custom_rewards: cr }, { 'user_code': 'eq.' + user.user_code });
+    });
+  },
+
   // 清空用户全量数据（打卡记录 + 个人数据）
   clearUserData: function() {
     if (!DB.nickname) return Promise.resolve(false);

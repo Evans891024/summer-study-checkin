@@ -781,22 +781,31 @@ document.addEventListener('DOMContentLoaded', function() {
         if (daysEl) { var v = daysEl.querySelector('.stat-value'); if (v) v.textContent = days + '天'; }
         DB.getUser().then(function(user) {
           if (user) {
-            var coinsEl = document.getElementById('stat-total-coins-rewards');
-            if (coinsEl) { var v2 = coinsEl.querySelector('.stat-value'); if (v2) v2.textContent = (user.total_coins || 0) + '枚'; }
-            var claimed = typeof user.claimed_achievements === 'string' ? JSON.parse(user.claimed_achievements) : (user.claimed_achievements || {});
-            var wonPrizes = typeof user.won_prizes === 'string' ? JSON.parse(user.won_prizes) : (user.won_prizes || []);
-            var claimedCount = 0; for (var k in claimed) { if (claimed.hasOwnProperty(k)) claimedCount++; }
-            var collEl = document.getElementById('stat-collected-rewards');
-            if (collEl) { var v3 = collEl.querySelector('.stat-value'); if (v3) v3.textContent = (claimedCount + wonPrizes.length) + '个'; }
-            var boxOpens = user.box_opens || 0;
-            var boxEl = document.getElementById('stat-box-opens');
-            if (boxEl) { var v4 = boxEl.querySelector('.stat-value'); if (v4) v4.textContent = boxOpens + '次'; }
-            var hr = document.getElementById('header-reward-count');
-            if (hr) hr.textContent = (claimedCount + wonPrizes.length);
-            var ap = document.getElementById('achievement-progress');
-            if (ap) ap.textContent = claimedCount + '/15';
-            // Render prizes from DB data
-            renderPrizeGridFromData(claimed, wonPrizes, user.used_prizes);
+            DB.getStats().then(function(stats) {
+              var wonPrizes = stats.won_prizes || [];
+              var boxOpens = stats.box_opens || 0;
+              var totalEarned = stats.total_earned_coins || 0;
+              // Also count checkin earnings from DB
+              DB.getAllCheckins().then(function(checkins2) {
+                var checkinCoins = 0;
+                if (checkins2) { checkins2.forEach(function(c) { checkinCoins += c.coins_earned || 0; }); }
+                var allEarned = totalEarned + checkinCoins;
+
+                var coinsEl = document.getElementById('stat-total-coins-rewards');
+                if (coinsEl) { var v2 = coinsEl.querySelector('.stat-value'); if (v2) v2.textContent = allEarned + '枚'; }
+                var claimed = typeof user.claimed_achievements === 'string' ? JSON.parse(user.claimed_achievements) : (user.claimed_achievements || {});
+                var claimedCount = 0; for (var k in claimed) { if (claimed.hasOwnProperty(k)) claimedCount++; }
+                var collEl = document.getElementById('stat-collected-rewards');
+                if (collEl) { var v3 = collEl.querySelector('.stat-value'); if (v3) v3.textContent = (claimedCount + wonPrizes.length) + '个'; }
+                var boxEl = document.getElementById('stat-box-opens');
+                if (boxEl) { var v4 = boxEl.querySelector('.stat-value'); if (v4) v4.textContent = boxOpens + '次'; }
+                var hr = document.getElementById('header-reward-count');
+                if (hr) hr.textContent = (claimedCount + wonPrizes.length);
+                var ap = document.getElementById('achievement-progress');
+                if (ap) ap.textContent = claimedCount + '/15';
+                renderPrizeGridFromData(claimed, wonPrizes, user.used_prizes);
+              });
+            });
           }
         });
       });
@@ -1072,6 +1081,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (user) {
           var newTotal = (user.total_coins || 0) + coinsToAdd;
           DB.updateUser({ total_coins: newTotal, claimed_achievements: state });
+          if (coinsToAdd > 0) { DB.getStats().then(function(s) { DB.addStats({ total_earned_coins: (s.total_earned_coins || 0) + coinsToAdd }); }); }
           setTimeout(function() { refreshStats(); }, 300);
         }
       });

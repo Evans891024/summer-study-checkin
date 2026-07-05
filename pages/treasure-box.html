@@ -782,7 +782,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var opens = parseInt(localStorage.getItem(sKey('box_opens')) || '0') + 1;
         localStorage.setItem(sKey('box_opens'), opens.toString());
         // Sync to Supabase
-        DB.updateUser({ won_prizes: won, box_opens: opens });
+        DB.addStats({ won_prizes: won, box_opens: opens });
       } catch(e) {}
     }, 2500);
   }
@@ -833,6 +833,10 @@ document.addEventListener('DOMContentLoaded', function() {
       coins += coinReward;
       updateCoinDisplay();
       try { DB.updateUser({ total_coins: coins }); } catch(e) {}
+      // Update total earned coins stats
+      DB.getStats().then(function(stats) {
+        DB.addStats({ total_earned_coins: (stats.total_earned_coins || 0) + coinReward });
+      });
 
       var overlay = document.getElementById('opening-overlay');
       var chest = document.getElementById('opening-chest');
@@ -879,7 +883,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
           var opens = parseInt(localStorage.getItem(sKey('box_opens')) || '0') + 1;
           localStorage.setItem(sKey('box_opens'), opens.toString());
-          DB.updateUser({ box_opens: opens });
+          DB.addStats({ box_opens: opens });
         } catch(e) {}
         // Mark today as used
         try {

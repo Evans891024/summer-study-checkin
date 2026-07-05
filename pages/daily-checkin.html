@@ -830,6 +830,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         DB.saveCheckin(todayKey, completedIndices, completedCount, totalTasks, todayCoins);
         DB.updateUser({ total_coins: coinCount });
+        DB.getStats().then(function(s) { DB.addStats({ total_earned_coins: (s.total_earned_coins || 0) + (coinReward || 2) }); });
       } catch(e) {
         console.warn('Supabase save error:', e);
       }
@@ -1104,6 +1105,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Also add retro coins to total balance
         coinCount += coins;
         DB.updateUser({ total_coins: coinCount });
+        DB.getStats().then(function(s) { DB.addStats({ total_earned_coins: (s.total_earned_coins || 0) + coins }); });
         var headerCoin = document.querySelector('.header-coin-badge');
         if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
       } catch(e) {}

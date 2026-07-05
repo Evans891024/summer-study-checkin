@@ -78,7 +78,7 @@
       "createdAt": 1783087700000,
       "canvasData": {
         "x": 620,
-        "y": 386,
+        "y": 422,
         "group": 0
       },
       "devMetadata": {
@@ -111,7 +111,7 @@
       "createdAt": 1783087700000,
       "canvasData": {
         "x": 620,
-        "y": 927,
+        "y": 880,
         "group": 0
       },
       "devMetadata": {
@@ -144,7 +144,7 @@
       "createdAt": 1783087800000,
       "canvasData": {
         "x": 0,
-        "y": 1478
+        "y": 1366
       },
       "devMetadata": {
         "imageSrc": "assets/hero-candy-land.jpg"
@@ -158,7 +158,7 @@
       "createdAt": 1783087800000,
       "canvasData": {
         "x": 620,
-        "y": 1478
+        "y": 1366
       },
       "devMetadata": {
         "imageSrc": "assets/treasure-chest.jpg"
