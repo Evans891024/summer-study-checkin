@@ -1010,13 +1010,13 @@ document.addEventListener('DOMContentLoaded', function() {
     coinsDiv.textContent = dayData ? ('获得 ' + (dayData.coins || totalCoinsForDay) + ' 枚金币 · 完成 ' + completedIndices.length + '/' + 9 + ' 项') : '当天无打卡记录';
     content.appendChild(coinsDiv);
 
-    // Retroactive checkin button (only for past days, not today)
+    // Retroactive checkin button (only for past days with no existing checkin)
     var todayKey = getTodayKey();
     actions.innerHTML = '';
-    if (dateKey !== todayKey && dateObj <= new Date()) {
+    if (dateKey !== todayKey && dateObj <= new Date() && (!dayData || dayData.completed === 0)) {
       var retroBtn = document.createElement('button');
       retroBtn.className = 'cal-retro-btn';
-      retroBtn.textContent = dayData && dayData.completed > 0 ? '修改打卡' : '补打卡';
+      retroBtn.textContent = '补打卡';
       retroBtn.addEventListener('click', function() {
         overlay.classList.remove('active');
         openRetroCheckin(dateKey, dateObj, taskNames, taskCoins);
