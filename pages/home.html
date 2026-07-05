@@ -535,14 +535,18 @@ document.addEventListener('DOMContentLoaded', function() {
             var greetWord = hour < 6 ? '夜深了' : hour < 12 ? '早上好' : hour < 14 ? '中午好' : hour < 18 ? '下午好' : '晚上好';
             greetingEl.textContent = greetWord + '，' + nickname + '！';
           }
-          // Update total coins stat card
-          if (user.total_coins !== undefined && user.total_coins !== null) {
-            var totalCoinsCard = document.getElementById('stat-total-coins');
-            if (totalCoinsCard) {
-              var valueEl = totalCoinsCard.querySelector('.value');
-              if (valueEl) valueEl.textContent = user.total_coins + '枚';
-            }
-          }
+          // Update total coins stat card — 自清除后所有途径获得的总金币
+          var totalCoinsCard = document.getElementById('stat-total-coins');
+          (function() {
+            var checkinSum = 0;
+            DB.getAllCheckins().then(function(checkins) {
+              if (checkins) { checkins.forEach(function(c) { checkinSum += c.coins_earned || 0; }); }
+              return DB.getStats ? DB.getStats() : Promise.resolve({ total_earned_coins: 0 });
+            }).then(function(stats) {
+              var total = checkinSum + (stats.total_earned_coins || 0);
+              if (totalCoinsCard) { var ve = totalCoinsCard.querySelector('.value'); if (ve) ve.textContent = total + '枚'; }
+            });
+          })();
         }
       });
       // Fetch real data for streak and today's coins

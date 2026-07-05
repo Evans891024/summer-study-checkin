@@ -262,12 +262,13 @@ var DB = {
       return sbFetch('checkins', 'DELETE', null, {
         'user_code': 'eq.' + user.user_code
       }).then(function() {
-        // 2. 重置用户字段
+        // 2. 重置用户字段（包括统计累计数）
         return sbFetch('users', 'PATCH', {
           total_coins: 0,
           claimed_achievements: {},
           used_prizes: [],
-          daily_free_date: ''
+          daily_free_date: '',
+          custom_rewards: { _stats: { won_prizes: [], box_opens: 0, total_earned_coins: 0 } }
         }, {
           'user_code': 'eq.' + user.user_code
         });
