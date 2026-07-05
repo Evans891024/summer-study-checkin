@@ -623,7 +623,6 @@ document.addEventListener('DOMContentLoaded', function() {
   } catch(e) {}
 
   var coins = 0; // Will be loaded from Supabase
-  var userDataLoaded = false;
   var serverDailyFreeDate = null;
 
   // Default reward pools
@@ -697,7 +696,6 @@ document.addEventListener('DOMContentLoaded', function() {
           if (user.daily_free_date) {
             serverDailyFreeDate = user.daily_free_date;
           }
-          userDataLoaded = true;
           updateCoinDisplay();
           checkDailyFree();
         }

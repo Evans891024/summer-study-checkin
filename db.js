@@ -197,20 +197,6 @@ var DB = {
     });
   },
 
-  // 获取月度打卡数据
-  getMonthCheckins: function(yearMonth) {
-    if (!DB.nickname) return Promise.resolve([]);
-    return DB.getUser().then(function(user) {
-      if (!user) return [];
-      return sbFetch('checkins', 'GET', null, {
-        'user_code': 'eq.' + user.user_code,
-        'date': 'like.' + yearMonth + '%',
-        'select': '*',
-        'order': 'date.asc'
-      });
-    });
-  },
-
   // 获取所有打卡数据（用于日历）
   getAllCheckins: function() {
     if (!DB.nickname) return Promise.resolve([]);

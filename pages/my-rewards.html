@@ -839,9 +839,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ========== Supabase Sync (wrapped in ensureLogin) ==========
   ensureLogin(function(nickname) {
-    var serverUser = null;
-
-    function updateStats() { refreshStats(); }
 
     function applyAchievementStates() {
       var claimed = getClaimedState();
@@ -867,123 +864,76 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           // Check achievements from real data — rebuild from scratch
           DB.getAllCheckins().then(function(checkins) {
-            var unlocked = [];
-            var taskIndicesByDate = {};
-            if (checkins && checkins.length > 0) {
-              checkins.forEach(function(c) { taskIndicesByDate[c.date] = c.completed_tasks || []; });
-            }
-            var dates = Object.keys(taskIndicesByDate).sort();
+            return DB.getStats().then(function(stats) {
+              var unlocked = [];
+              var taskIndicesByDate = {};
+              if (checkins && checkins.length > 0) {
+                checkins.forEach(function(c) { taskIndicesByDate[c.date] = c.completed_tasks || []; });
+              }
+              var dates = Object.keys(taskIndicesByDate).sort();
               // 1: 初来乍到 — first checkin
-              if (unlocked.indexOf(1) === -1 && dates.length > 0) { unlocked.push(1); }
+              if (dates.length > 0) { unlocked.push(1); }
               // 2: 连续3天 — check consecutive dates
-              if (unlocked.indexOf(2) === -1) {
-                var streak = 0;
-                var prevDate = null;
-                dates.forEach(function(d) {
-                  if (!prevDate) { streak = 1; prevDate = d; return; }
-                  var prev = new Date(prevDate), curr = new Date(d);
-                  var diff = Math.round((curr - prev) / 86400000);
-                  if (diff === 1) { streak++; } else { streak = 1; }
-                  prevDate = d;
-                });
-                if (streak >= 3) unlocked.push(2);
-              }
+              var streak = 0, prevDate = null;
+              dates.forEach(function(d) {
+                if (!prevDate) { streak = 1; prevDate = d; return; }
+                if (Math.round((new Date(d) - new Date(prevDate)) / 86400000) === 1) streak++; else streak = 1;
+                prevDate = d;
+              });
+              if (streak >= 3) unlocked.push(2);
               // 3: 阅读小达人 — count days with reading tasks (4 or 6)
-              if (unlocked.indexOf(3) === -1) {
-                var readingDays = 0;
-                checkins.forEach(function(c) {
-                  var tasks = c.completed_tasks || [];
-                  if (tasks.indexOf(4) !== -1 || tasks.indexOf(6) !== -1) readingDays++;
-                });
-                if (readingDays >= 7) unlocked.push(3);
-              }
-              // 4: 练字小能手 — count days with task 2 (练字)
-              if (unlocked.indexOf(4) === -1) {
-                var writingDays = 0;
-                checkins.forEach(function(c) {
-                  if ((c.completed_tasks || []).indexOf(2) !== -1) writingDays++;
-                });
-                if (writingDays >= 5) unlocked.push(4);
-              }
-              // 5: 学习小公主 — 3 days with all tasks
-              if (unlocked.indexOf(5) === -1) {
-                var fullDays = 0;
-                checkins.forEach(function(c) {
-                  if (c.completed_count === c.total_count && c.total_count >= 9) fullDays++;
-                });
-                if (fullDays >= 3) unlocked.push(5);
-              }
-              // 6: 满分达人 — 5 days with task 3 (口算)
-              if (unlocked.indexOf(6) === -1) {
-                var mathDays = 0;
-                checkins.forEach(function(c) {
-                  if ((c.completed_tasks || []).indexOf(3) !== -1) mathDays++;
-                });
-                if (mathDays >= 5) unlocked.push(6);
-              }
+              var readingDays = 0;
+              checkins.forEach(function(c) { var t = c.completed_tasks || []; if (t.indexOf(4) !== -1 || t.indexOf(6) !== -1) readingDays++; });
+              if (readingDays >= 7) unlocked.push(3);
+              // 4: 练字小能手 — task 2
+              var writingDays = 0;
+              checkins.forEach(function(c) { if ((c.completed_tasks || []).indexOf(2) !== -1) writingDays++; });
+              if (writingDays >= 5) unlocked.push(4);
+              // 5: 学习小公主 — 3 days all tasks
+              var fullDays = 0;
+              checkins.forEach(function(c) { if (c.completed_count === c.total_count && c.total_count >= 9) fullDays++; });
+              if (fullDays >= 3) unlocked.push(5);
+              // 6: 满分达人 — 5 days task 3 (口算)
+              var mathDays = 0;
+              checkins.forEach(function(c) { if ((c.completed_tasks || []).indexOf(3) !== -1) mathDays++; });
+              if (mathDays >= 5) unlocked.push(6);
               // 7: 连续7天
-              if (unlocked.indexOf(7) === -1) {
-                var streak7 = 0;
-                var prevDate7 = null;
-                dates.forEach(function(d) {
-                  if (!prevDate7) { streak7 = 1; prevDate7 = d; return; }
-                  var prev = new Date(prevDate7), curr = new Date(d);
-                  if (Math.round((curr - prev) / 86400000) === 1) streak7++; else streak7 = 1;
-                  prevDate7 = d;
-                });
-                if (streak7 >= 7) unlocked.push(7);
-              }
-              // 8: 超级学霸 — 10 days with all tasks
-              if (unlocked.indexOf(8) === -1) {
-                var fullDays10 = 0;
-                checkins.forEach(function(c) {
-                  if (c.completed_count === c.total_count && c.total_count >= 9) fullDays10++;
-                });
-                if (fullDays10 >= 10) unlocked.push(8);
-              }
-              // 11: 字帖达人 — 15 days with task 2
-              if (unlocked.indexOf(11) === -1) {
-                var writingDays15 = 0;
-                checkins.forEach(function(c) {
-                  if ((c.completed_tasks || []).indexOf(2) !== -1) writingDays15++;
-                });
-                if (writingDays15 >= 15) unlocked.push(11);
-              }
-              // 12: 计算高手 — 20 days with task 3
-              if (unlocked.indexOf(12) === -1) {
-                var mathDays20 = 0;
-                checkins.forEach(function(c) {
-                  if ((c.completed_tasks || []).indexOf(3) !== -1) mathDays20++;
-                });
-                if (mathDays20 >= 20) unlocked.push(12);
-              }
-              // 13: 作文能手 — 15 days with task 7
-              if (unlocked.indexOf(13) === -1) {
-                var essayDays15 = 0;
-                checkins.forEach(function(c) {
-                  if ((c.completed_tasks || []).indexOf(7) !== -1) essayDays15++;
-                });
-                if (essayDays15 >= 15) unlocked.push(13);
-              }
+              var streak7 = 0, prevDate7 = null;
+              dates.forEach(function(d) {
+                if (!prevDate7) { streak7 = 1; prevDate7 = d; return; }
+                if (Math.round((new Date(d) - new Date(prevDate7)) / 86400000) === 1) streak7++; else streak7 = 1;
+                prevDate7 = d;
+              });
+              if (streak7 >= 7) unlocked.push(7);
+              // 8: 超级学霸 — 10 all tasks
+              var fullDays10 = 0;
+              checkins.forEach(function(c) { if (c.completed_count === c.total_count && c.total_count >= 9) fullDays10++; });
+              if (fullDays10 >= 10) unlocked.push(8);
+              // 9: 暑期冠军 — 60 days
+              if (dates.length >= 60) unlocked.push(9);
+              // 11: 字帖达人 — 15 days task 2
+              var writingDays15 = 0;
+              checkins.forEach(function(c) { if ((c.completed_tasks || []).indexOf(2) !== -1) writingDays15++; });
+              if (writingDays15 >= 15) unlocked.push(11);
+              // 12: 计算高手 — 20 days task 3
+              var mathDays20 = 0;
+              checkins.forEach(function(c) { if ((c.completed_tasks || []).indexOf(3) !== -1) mathDays20++; });
+              if (mathDays20 >= 20) unlocked.push(12);
+              // 13: 作文能手 — 15 days task 7
+              var essayDays15 = 0;
+              checkins.forEach(function(c) { if ((c.completed_tasks || []).indexOf(7) !== -1) essayDays15++; });
+              if (essayDays15 >= 15) unlocked.push(13);
               // 14: 宝箱猎人 — box_opens >= 30
-              if (unlocked.indexOf(14) === -1) {
-                if ((user.box_opens || 0) >= 30) unlocked.push(14);
-              }
+              if ((stats.box_opens || 0) >= 30) unlocked.push(14);
               // 15: 暑期勇士 — 30 days
-              if (unlocked.indexOf(15) === -1) {
-                if (dates.length >= 30) unlocked.push(15);
-              }
-              // 9: 暑期冠军 — entire summer (just use 60 days)
-              if (unlocked.indexOf(9) === -1) {
-                if (dates.length >= 60) unlocked.push(9);
-              }
-              // 10: 早鸟之星 — can't check time from data, skip
+              if (dates.length >= 30) unlocked.push(15);
               saveUnlockedAchievements(unlocked);
-            applyAchievementUnlockStates();
+              applyAchievementUnlockStates();
+            });
           });
           // Re-apply UI states
           applyAchievementStates();
-          updateStats();
+          refreshStats();
         }
       }).catch(function(e) { console.warn('Supabase init failed:', e); });
     } catch(e) {}
