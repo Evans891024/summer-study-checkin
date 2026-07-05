@@ -230,42 +230,6 @@
         </div>
       </div>
 
-      <!-- Stats Overview Section -->
-      <div>
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-          <span style="font-size: 1.25rem;">&#x1F4CA;</span>
-          <h2 style="font-family: var(--font-family-title); font-size: var(--font-size-h3); margin: 0; color: var(--color-text);">
-            我的成绩
-          </h2>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-          <div id="stat-checkin-days" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
-            <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F4C5;</div>
-            <div class="stat-value" style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-primary); margin: 0;">0天</div>
-            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">打卡天数</div>
-          </div>
-
-          <div id="stat-total-coins-rewards" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
-            <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F4B0;</div>
-            <div class="stat-value" style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-accent-yellow); margin: 0;">0枚</div>
-            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">获得金币</div>
-          </div>
-
-          <div id="stat-box-opens" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
-            <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F381;</div>
-            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-secondary); margin: 0;">0次</div>
-            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">开启宝箱</div>
-          </div>
-
-          <div id="stat-collected-rewards" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px; text-align: center; box-shadow: var(--shadow-sm);">
-            <div style="font-size: 1.5rem; margin-bottom: 4px;">&#x1F3C6;</div>
-            <div style="font-family: var(--font-family-title); font-size: 1.25rem; color: var(--color-accent-green); margin: 0;">0个</div>
-            <div style="font-size: var(--font-size-xs); color: var(--color-text-secondary); margin: 2px 0 0;">收集奖励</div>
-          </div>
-        </div>
-      </div>
-
     </div>
 
     <!-- Bottom Tab Bar -->
@@ -775,38 +739,17 @@ document.addEventListener('DOMContentLoaded', function() {
   // ========== External refreshStats (accessible everywhere) ==========
   function refreshStats() {
     try {
-      DB.getAllCheckins().then(function(checkins) {
-        var days = checkins ? checkins.length : 0;
-        var daysEl = document.getElementById('stat-checkin-days');
-        if (daysEl) { var v = daysEl.querySelector('.stat-value'); if (v) v.textContent = days + '天'; }
-        DB.getUser().then(function(user) {
-          if (user) {
-            DB.getStats().then(function(stats) {
-              var wonPrizes = stats.won_prizes || [];
-              var boxOpens = stats.box_opens || 0;
-              var totalEarned = stats.total_earned_coins || 0;
-              // Also count checkin earnings from DB
-              DB.getAllCheckins().then(function(checkins2) {
-                var checkinCoins = 0;
-                if (checkins2) { checkins2.forEach(function(c) { checkinCoins += c.coins_earned || 0; }); }
-                var allEarned = totalEarned + checkinCoins;
-
-                var coinsEl = document.getElementById('stat-total-coins-rewards');
-                if (coinsEl) { var v2 = coinsEl.querySelector('.stat-value'); if (v2) v2.textContent = allEarned + '枚'; }
-                var claimed = typeof user.claimed_achievements === 'string' ? JSON.parse(user.claimed_achievements) : (user.claimed_achievements || {});
-                var claimedCount = 0; for (var k in claimed) { if (claimed.hasOwnProperty(k)) claimedCount++; }
-                var collEl = document.getElementById('stat-collected-rewards');
-                if (collEl) { var v3 = collEl.querySelector('.stat-value'); if (v3) v3.textContent = (claimedCount + wonPrizes.length) + '个'; }
-                var boxEl = document.getElementById('stat-box-opens');
-                if (boxEl) { var v4 = boxEl.querySelector('.stat-value'); if (v4) v4.textContent = boxOpens + '次'; }
-                var hr = document.getElementById('header-reward-count');
-                if (hr) hr.textContent = (claimedCount + wonPrizes.length);
-                var ap = document.getElementById('achievement-progress');
-                if (ap) ap.textContent = claimedCount + '/15';
-                renderPrizeGridFromData(claimed, wonPrizes, user.used_prizes);
-              });
-            });
-          }
+      DB.getUser().then(function(user) {
+        if (!user) return;
+        DB.getStats().then(function(stats) {
+          var wonPrizes = stats.won_prizes || [];
+          var claimed = typeof user.claimed_achievements === 'string' ? JSON.parse(user.claimed_achievements) : (user.claimed_achievements || {});
+          var claimedCount = 0; for (var k in claimed) { if (claimed.hasOwnProperty(k)) claimedCount++; }
+          var hr = document.getElementById('header-reward-count');
+          if (hr) hr.textContent = (claimedCount + wonPrizes.length);
+          var ap = document.getElementById('achievement-progress');
+          if (ap) ap.textContent = claimedCount + '/15';
+          renderPrizeGridFromData(claimed, wonPrizes, user.used_prizes);
         });
       });
     } catch(e) {}
