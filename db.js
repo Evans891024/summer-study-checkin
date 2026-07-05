@@ -252,7 +252,7 @@ var DB = {
         return sbFetch('users', 'PATCH', {
           total_coins: 0,
           claimed_achievements: {},
-          used_prizes: [],
+          used_prizes: {},
           daily_free_date: '',
           custom_rewards: { _stats: { won_prizes: [], box_opens: 0, total_earned_coins: 0 } }
         }, {

@@ -772,13 +772,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var usedPrizes = {};
     if (usedPrizesRaw) {
       usedPrizes = typeof usedPrizesRaw === 'string' ? JSON.parse(usedPrizesRaw) : usedPrizesRaw;
+      if (Array.isArray(usedPrizes)) usedPrizes = {};
     }
-    // Also try localStorage
     if (Object.keys(usedPrizes).length === 0) {
       try {
         var nickname = getNickname();
         var localUsed = localStorage.getItem(nickname ? 'used_prizes_' + nickname : 'used_prizes');
         if (localUsed) usedPrizes = JSON.parse(localUsed);
+        if (Array.isArray(usedPrizes)) usedPrizes = {};
       } catch(e) {}
     }
     if (wonPrizes.length === 0) { if (section) section.style.display = 'none'; return; }
