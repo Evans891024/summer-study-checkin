@@ -772,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ========== External updateStats (accessible everywhere) ==========
+  // ========== External refreshStats (accessible everywhere) ==========
   function refreshStats() {
     try {
       DB.getAllCheckins().then(function(checkins) {
@@ -795,10 +795,94 @@ document.addEventListener('DOMContentLoaded', function() {
             if (hr) hr.textContent = (claimedCount + wonPrizes.length);
             var ap = document.getElementById('achievement-progress');
             if (ap) ap.textContent = claimedCount + '/15';
+            // Render prizes from DB data
+            renderPrizeGridFromData(claimed, wonPrizes, user.used_prizes);
           }
         });
       });
     } catch(e) {}
+  }
+
+  // ===== Prize rendering (global, used by refreshStats) =====
+  function renderPrizeGridFromData(claimedObj, wonPrizes, usedPrizesRaw) {
+    var grid = document.getElementById('prizes-grid');
+    var section = document.getElementById('prizes-section');
+    var countEl = document.getElementById('prize-count');
+    if (!grid) return;
+    // Also try localStorage as fallback
+    if (wonPrizes.length === 0) {
+      try {
+        var nickname = getNickname();
+        var localWon = localStorage.getItem(nickname ? 'won_prizes_' + nickname : 'won_prizes');
+        if (localWon) wonPrizes = JSON.parse(localWon);
+      } catch(e) {}
+    }
+    var usedPrizes = {};
+    if (usedPrizesRaw) {
+      usedPrizes = typeof usedPrizesRaw === 'string' ? JSON.parse(usedPrizesRaw) : usedPrizesRaw;
+    }
+    // Also try localStorage
+    if (Object.keys(usedPrizes).length === 0) {
+      try {
+        var nickname = getNickname();
+        var localUsed = localStorage.getItem(nickname ? 'used_prizes_' + nickname : 'used_prizes');
+        if (localUsed) usedPrizes = JSON.parse(localUsed);
+      } catch(e) {}
+    }
+    if (wonPrizes.length === 0) { if (section) section.style.display = 'none'; return; }
+    if (section) section.style.display = 'block';
+    if (countEl) countEl.textContent = wonPrizes.length + '件';
+    grid.innerHTML = '';
+    wonPrizes.slice(-6).reverse().forEach(function(p, idx) {
+      var boxClass = p.type === 'gold' ? 'prize-card-golden' : '';
+      var borderColor = p.type === 'gold' ? '#FDE68A' : p.type === 'silver' ? '#BFDBFE' : '#FED7AA';
+      var boxShadow = p.type === 'gold' ? '0 4px 16px rgba(251,191,36,0.15)' : 'var(--shadow-card)';
+      var prizeKey = 'won-' + p.date + '-' + p.name + '-' + idx;
+      var isUsed = !!usedPrizes[prizeKey];
+      var card = document.createElement('div');
+      card.className = 'prize-card ' + boxClass + (isUsed ? ' used' : '');
+      card.setAttribute('data-prize-key', prizeKey);
+      card.style.cssText = 'background:var(--color-surface);border:1px solid ' + borderColor + ';border-radius:var(--radius-lg);padding:16px 12px;text-align:center;box-shadow:' + boxShadow + ';cursor:pointer;position:relative;overflow:hidden;';
+      card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + p.emoji + '</div>'
+        + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
+        + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>'
+        + (isUsed ? '<div style="position:absolute;top:4px;right:4px;background:#34D399;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">已用</div>' : '');
+      card.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (card.classList.contains('used')) return;
+        if (card.classList.contains('confirming')) return;
+        card.classList.add('confirming');
+        var originalContent = card.innerHTML;
+        var emoji = p.emoji;
+        card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:4px;">' + emoji + '</div>'
+          + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 6px;color:var(--color-text);">确定使用 ' + p.name + '？</p>'
+          + '<div style="display:flex;gap:8px;justify-content:center;">'
+          + '<button class="btn-confirm" style="padding:4px 14px;border-radius:12px;border:none;background:#34D399;color:#fff;cursor:pointer;font-size:12px;font-family:inherit;">确定</button>'
+          + '<button class="btn-cancel" style="padding:4px 14px;border-radius:12px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;font-family:inherit;">取消</button>'
+          + '</div>';
+        card.querySelector('.btn-confirm').addEventListener('click', function(ev) {
+          ev.stopPropagation();
+          card.classList.remove('confirming');
+          card.classList.add('used');
+          usedPrizes[prizeKey] = true;
+          try {
+            var nickname = getNickname();
+            localStorage.setItem(nickname ? 'used_prizes_' + nickname : 'used_prizes', JSON.stringify(usedPrizes));
+          } catch(e) {}
+          DB.updateUser({ used_prizes: usedPrizes });
+          card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + emoji + '</div>'
+            + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
+            + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>'
+            + '<div style="position:absolute;top:4px;right:4px;background:#34D399;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">已用</div>';
+        });
+        card.querySelector('.btn-cancel').addEventListener('click', function(ev) {
+          ev.stopPropagation();
+          card.classList.remove('confirming');
+          card.innerHTML = originalContent;
+        });
+      });
+      grid.appendChild(card);
+    });
   }
 
   // ========== Supabase Sync (wrapped in ensureLogin) ==========
@@ -815,86 +899,6 @@ document.addEventListener('DOMContentLoaded', function() {
           badge.style.outline = '2px solid var(--color-accent-green)';
           badge.style.outlineOffset = '2px';
         }
-      });
-    }
-
-    function renderPrizes() {
-      try {
-        var wonStr = localStorage.getItem(scopedKey('won_prizes'));
-        var won = wonStr ? JSON.parse(wonStr) : [];
-        DB.getUser().then(function(dbUser) {
-          var serverWon = null;
-          if (dbUser && dbUser.won_prizes) {
-            serverWon = typeof dbUser.won_prizes === 'string' ? JSON.parse(dbUser.won_prizes) : dbUser.won_prizes;
-          }
-          if (serverWon && serverWon.length > 0 && won.length === 0) {
-            won = serverWon;
-          }
-          var usedPrizes = {};
-          try { var up = localStorage.getItem(scopedKey('used_prizes')); if (up) usedPrizes = JSON.parse(up); } catch(e) {}
-          if (dbUser && dbUser.used_prizes && Object.keys(usedPrizes).length === 0) {
-            usedPrizes = typeof dbUser.used_prizes === 'string' ? JSON.parse(dbUser.used_prizes) : (dbUser.used_prizes || {});
-          }
-          renderPrizeGrid(won, usedPrizes);
-        });
-      } catch(e) {}
-    }
-
-    function renderPrizeGrid(won, usedPrizes) {
-      var grid = document.getElementById('prizes-grid');
-      var section = document.getElementById('prizes-section');
-      var countEl = document.getElementById('prize-count');
-      if (!grid) return;
-      if (won.length === 0) { if (section) section.style.display = 'none'; return; }
-      if (section) section.style.display = 'block';
-      if (countEl) countEl.textContent = won.length + '件';
-      grid.innerHTML = '';
-      won.slice(-6).reverse().forEach(function(p, idx) {
-        var boxClass = p.type === 'gold' ? 'prize-card-golden' : '';
-        var borderColor = p.type === 'gold' ? '#FDE68A' : p.type === 'silver' ? '#BFDBFE' : '#FED7AA';
-        var boxShadow = p.type === 'gold' ? '0 4px 16px rgba(251,191,36,0.15)' : 'var(--shadow-card)';
-        var prizeKey = 'won-' + p.date + '-' + p.name + '-' + idx;
-        var isUsed = !!usedPrizes[prizeKey];
-        var card = document.createElement('div');
-        card.className = 'prize-card ' + boxClass + (isUsed ? ' used' : '');
-        card.setAttribute('data-prize-key', prizeKey);
-        card.style.cssText = 'background:var(--color-surface);border:1px solid ' + borderColor + ';border-radius:var(--radius-lg);padding:16px 12px;text-align:center;box-shadow:' + boxShadow + ';cursor:pointer;position:relative;overflow:hidden;';
-        card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + p.emoji + '</div>'
-          + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
-          + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>'
-          + (isUsed ? '<div style="position:absolute;top:4px;right:4px;background:#34D399;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">已用</div>' : '');
-        card.addEventListener('click', function(e) {
-          e.stopPropagation();
-          if (card.classList.contains('used')) return;
-          if (card.classList.contains('confirming')) return;
-          card.classList.add('confirming');
-          var originalContent = card.innerHTML;
-          var emoji = p.emoji;
-          card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:4px;">' + emoji + '</div>'
-            + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 6px;color:var(--color-text);">确定使用 ' + p.name + '？</p>'
-            + '<div style="display:flex;gap:8px;justify-content:center;">'
-            + '<button class="btn-confirm" style="padding:4px 14px;border-radius:12px;border:none;background:#34D399;color:#fff;cursor:pointer;font-size:12px;font-family:inherit;">确定</button>'
-            + '<button class="btn-cancel" style="padding:4px 14px;border-radius:12px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;font-family:inherit;">取消</button>'
-            + '</div>';
-          card.querySelector('.btn-confirm').addEventListener('click', function(ev) {
-            ev.stopPropagation();
-            card.classList.remove('confirming');
-            card.classList.add('used');
-            usedPrizes[prizeKey] = true;
-            localStorage.setItem(scopedKey('used_prizes'), JSON.stringify(usedPrizes));
-            DB.updateUser({ used_prizes: usedPrizes });
-            card.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">' + emoji + '</div>'
-              + '<p style="font-size:var(--font-size-small);font-weight:var(--font-weight-medium);margin:0 0 4px;color:var(--color-text);">' + p.name + '</p>'
-              + '<p style="font-size:var(--font-size-xs);color:var(--color-text-tertiary);margin:0;">来自 ' + (p.type === 'gold' ? '金' : p.type === 'silver' ? '银' : '铜') + '宝箱</p>'
-              + '<div style="position:absolute;top:4px;right:4px;background:#34D399;color:#fff;font-size:10px;padding:1px 6px;border-radius:8px;">已用</div>';
-          });
-          card.querySelector('.btn-cancel').addEventListener('click', function(ev) {
-            ev.stopPropagation();
-            card.classList.remove('confirming');
-            card.innerHTML = originalContent;
-          });
-        });
-        grid.appendChild(card);
       });
     }
 

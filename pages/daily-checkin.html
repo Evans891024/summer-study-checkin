@@ -1101,6 +1101,11 @@ document.addEventListener('DOMContentLoaded', function() {
       // Save to Supabase
       try {
         DB.saveCheckin(dateKey, existingTasks, existingTasks.length, 9, coins);
+        // Also add retro coins to total balance
+        coinCount += coins;
+        DB.updateUser({ total_coins: coinCount });
+        var headerCoin = document.querySelector('.header-coin-badge');
+        if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
       } catch(e) {}
 
       modal.remove();
