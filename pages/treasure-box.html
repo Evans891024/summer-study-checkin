@@ -625,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var coins = 0; // Will be loaded from Supabase
   var serverDailyFreeDate = null;
 
-  // Default reward pools
+  // Default reward pools (fallback)
   var defaultRewards = {
     bronze: ['可爱贴纸', '彩色铅笔', '小橡皮', '书签'],
     silver: ['手账本', '彩色笔套装', '阅读灯', '笔记本'],
@@ -637,36 +637,30 @@ document.addEventListener('DOMContentLoaded', function() {
     gold: ['👑', '📚', '🔮', '✨']
   };
 
-  // Load rewards from localStorage or use defaults
-  function loadRewards() {
-    try {
-      var savedRewards = localStorage.getItem(sKey('treasure_rewards'));
-      var savedEmojis = localStorage.getItem(sKey('treasure_emojis'));
-      if (savedRewards) return { rewards: JSON.parse(savedRewards), emojis: savedEmojis ? JSON.parse(savedEmojis) : defaultEmojis };
-    } catch(e) {}
-    return null;
-  }
+  // 全账号通用：从数据库加载
+  var rewards = JSON.parse(JSON.stringify(defaultRewards));
+  var emojis = JSON.parse(JSON.stringify(defaultEmojis));
+  DB.getGlobalRewards().then(function(cr) {
+    if (cr && cr.bronze) {
+      rewards.bronze = cr.bronze.names || rewards.bronze;
+      emojis.bronze = cr.bronze.emojis || emojis.bronze;
+    }
+    if (cr && cr.silver) {
+      rewards.silver = cr.silver.names || rewards.silver;
+      emojis.silver = cr.silver.emojis || emojis.silver;
+    }
+    if (cr && cr.gold) {
+      rewards.gold = cr.gold.names || rewards.gold;
+      emojis.gold = cr.gold.emojis || emojis.gold;
+    }
+  });
   function saveRewards() {
-    try {
-      localStorage.setItem(sKey('treasure_rewards'), JSON.stringify(rewards));
-      localStorage.setItem(sKey('treasure_emojis'), JSON.stringify(emojis));
-    } catch(e) {}
-    // Also save to Supabase
-    try {
-      DB.updateUser({
-        custom_rewards: {
-          bronze: { names: rewards.bronze, emojis: emojis.bronze },
-          silver: { names: rewards.silver, emojis: emojis.silver },
-          gold: { names: rewards.gold, emojis: emojis.gold }
-        }
-      });
-    } catch(e) {}
+    DB.saveGlobalRewards({
+      bronze: { names: rewards.bronze, emojis: emojis.bronze },
+      silver: { names: rewards.silver, emojis: emojis.silver },
+      gold: { names: rewards.gold, emojis: emojis.gold }
+    });
   }
-
-  // Priority: localStorage > defaults
-  var loaded = loadRewards();
-  var rewards = loaded ? loaded.rewards : JSON.parse(JSON.stringify(defaultRewards));
-  var emojis = loaded ? loaded.emojis : JSON.parse(JSON.stringify(defaultEmojis));
 
   // Initialize from Supabase (wrapped in ensureLogin)
   ensureLogin(function(nickname) {
@@ -674,24 +668,6 @@ document.addEventListener('DOMContentLoaded', function() {
       DB.initUser().then(function(user) {
         if (user) {
           coins = user.total_coins || 0;
-          // Load custom rewards from user data
-          if (user.custom_rewards) {
-            try {
-              var cr = typeof user.custom_rewards === 'string' ? JSON.parse(user.custom_rewards) : user.custom_rewards;
-              if (cr && cr.bronze) {
-                rewards.bronze = cr.bronze.names || rewards.bronze;
-                emojis.bronze = cr.bronze.emojis || emojis.bronze;
-              }
-              if (cr && cr.silver) {
-                rewards.silver = cr.silver.names || rewards.silver;
-                emojis.silver = cr.silver.emojis || emojis.silver;
-              }
-              if (cr && cr.gold) {
-                rewards.gold = cr.gold.names || rewards.gold;
-                emojis.gold = cr.gold.emojis || emojis.gold;
-              }
-            } catch(e) {}
-          }
           // Load daily free date from server
           if (user.daily_free_date) {
             serverDailyFreeDate = user.daily_free_date;

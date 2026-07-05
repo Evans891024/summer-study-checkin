@@ -239,6 +239,38 @@ var DB = {
     });
   },
 
+  // 全账号通用的自定义奖励（存储在固定 user_code 的记录中）
+  GLOBAL_USER: '_global_rewards_',
+  getGlobalRewards: function() {
+    return sbFetch('users', 'GET', null, {
+      'user_code': 'eq.' + DB.GLOBAL_USER,
+      'select': 'custom_rewards'
+    }).then(function(data) {
+      if (data && data.length > 0 && data[0].custom_rewards) {
+        var cr = typeof data[0].custom_rewards === 'string' ? JSON.parse(data[0].custom_rewards) : data[0].custom_rewards;
+        return cr;
+      }
+      return null;
+    });
+  },
+  saveGlobalRewards: function(cr) {
+    return sbFetch('users', 'GET', null, {
+      'user_code': 'eq.' + DB.GLOBAL_USER,
+      'select': 'user_code'
+    }).then(function(data) {
+      if (data && data.length > 0) {
+        return sbFetch('users', 'PATCH', { custom_rewards: cr }, { 'user_code': 'eq.' + DB.GLOBAL_USER });
+      } else {
+        return sbFetch('users', 'POST', {
+          user_code: DB.GLOBAL_USER,
+          nickname: DB.GLOBAL_USER,
+          total_coins: 0,
+          custom_rewards: cr
+        });
+      }
+    });
+  },
+
   // 清空用户全量数据（打卡记录 + 个人数据）
   clearUserData: function() {
     if (!DB.nickname) return Promise.resolve(false);
