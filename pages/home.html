@@ -378,11 +378,11 @@
                         <div class="label">连续打卡</div>
                         <div class="value">0天</div>
                     </div>
-                    <!-- Card 2: Today's Coins -->
-                    <div id="stat-today-coins" class="stat-card" style="background: linear-gradient(135deg, #A855F7, #C084FC); box-shadow: var(--shadow-card);">
-                        <div class="emoji">💰</div>
-                        <div class="label">今日金币</div>
-                        <div class="value">0枚</div>
+                    <!-- Card 2: Checkin Days -->
+                    <div id="stat-total-days" class="stat-card" style="background: linear-gradient(135deg, #A855F7, #C084FC); box-shadow: var(--shadow-card);">
+                        <div class="emoji">📅</div>
+                        <div class="label">打卡天数</div>
+                        <div class="value">0天</div>
                     </div>
                     <!-- Card 3: Total Coins -->
                     <div id="stat-total-coins" class="stat-card" style="background: linear-gradient(135deg, #38BDF8, #7DD3FC); box-shadow: var(--shadow-card);">
@@ -569,12 +569,10 @@ document.addEventListener('DOMContentLoaded', function() {
         var streakCard = document.getElementById('stat-streak');
         if (streakCard) { var sv = streakCard.querySelector('.value'); if (sv) sv.textContent = streak + '天'; }
       });
-      DB.getCheckin(todayKey).then(function(checkin) {
-        var todayCoinsEl = document.getElementById('stat-today-coins');
-        if (todayCoinsEl) {
-          var tv = todayCoinsEl.querySelector('.value');
-          if (tv) tv.textContent = (checkin ? (checkin.coins_earned || 0) : 0) + '枚';
-        }
+      // 总打卡天数（自清除缓存后）
+      DB.getAllCheckins().then(function(all) {
+        var daysEl = document.getElementById('stat-total-days');
+        if (daysEl) { var dv = daysEl.querySelector('.value'); if (dv) dv.textContent = (all ? all.length : 0) + '天'; }
       });
     } catch(e) { console.warn('Supabase init failed:', e); }
   });
