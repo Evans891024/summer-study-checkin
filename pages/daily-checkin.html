@@ -1095,6 +1095,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('retro-save').addEventListener('click', function() {
       var coins = 0;
       existingTasks.forEach(function(idx) { coins += taskCoins[idx]; });
+      // 计算新旧金币差值：旧金币（已有记录）vs 新金币
+      var oldData = getCheckinData();
+      var oldDayData = oldData[dateKey];
+      var oldCoins = oldDayData ? (oldDayData.coins || 0) : 0;
+      var diff = coins - oldCoins;
       var newData = getCheckinData();
       newData[dateKey] = { completed: existingTasks.length, total: 9, tasks: existingTasks.slice(), coins: coins };
       saveCheckinData(newData);
@@ -1102,10 +1107,12 @@ document.addEventListener('DOMContentLoaded', function() {
       // Save to Supabase
       try {
         DB.saveCheckin(dateKey, existingTasks, existingTasks.length, 9, coins);
-        // Also add retro coins to total balance
-        coinCount += coins;
+        // 用差值调整余额：多选加金币，取消减金币
+        coinCount += diff;
         DB.updateUser({ total_coins: coinCount });
-        DB.getStats().then(function(s) { DB.addStats({ total_earned_coins: (s.total_earned_coins || 0) + coins }); });
+        if (diff > 0) {
+          DB.getStats().then(function(s) { DB.addStats({ total_earned_coins: (s.total_earned_coins || 0) + diff }); });
+        }
         var headerCoin = document.querySelector('.header-coin-badge');
         if (headerCoin) headerCoin.innerHTML = '<span>💰</span><span>' + coinCount + '枚</span>';
       } catch(e) {}
