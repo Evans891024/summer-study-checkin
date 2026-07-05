@@ -1076,10 +1076,9 @@ document.addEventListener('DOMContentLoaded', function() {
           + '<span style="flex:1;font-size:var(--font-size-body);color:var(--color-text);font-family:var(--font-family-body);">' + task.name + '</span>'
           + '<span style="font-size:var(--font-size-xs);color:var(--color-accent-orange);">+' + taskCoins[i] + '💰</span>';
         row.addEventListener('click', function() {
+          if (isChecked) return; // 已补打卡的项目不能取消
           var idx = taskNames.indexOf(task);
-          var pos = existingTasks.indexOf(idx);
-          if (pos !== -1) existingTasks.splice(pos, 1);
-          else existingTasks.push(idx);
+          existingTasks.push(idx);
           renderRetroTasks();
         });
         retroTasks.appendChild(row);
